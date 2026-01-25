@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raymond Realty - Chat Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #475569;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image:
+                radial-gradient(at 20% 80%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(14, 165, 233, 0.15) 0, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0, transparent 50%);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            max-height: 800px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-info h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .header-info .status {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .message.user .message-avatar {
+            background: var(--bg-input);
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message.user .message-content {
+            align-items: flex-end;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .message.assistant .message-bubble {
+            background: var(--bg-input);
+            border-bottom-left-radius: 6px;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-bottom-right-radius: 6px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 0 8px;
+        }
+
+        .property-cards {
+            display: grid;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .property-card {
+            background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(14,165,233,0.05));
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 16px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .property-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99,102,241,0.2);
+        }
+
+        .property-card h4 {
+            color: var(--primary-light);
+            font-size: 1rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .property-card .price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .property-card .details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .property-card .amenities {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .property-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .property-links a {
+            background: rgba(99,102,241,0.15);
+            color: var(--primary-light);
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .property-links a:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 16px 20px;
+            background: var(--bg-input);
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        .input-area {
+            padding: 20px 24px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .text-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .text-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+            resize: none;
+            max-height: 120px;
+        }
+
+        .text-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.2s;
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 0; }
+            .chat-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            .chat-header { padding: 16px; }
+            .messages-container { padding: 16px; }
+            .input-area { padding: 16px; }
+            .message { max-width: 90%; }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .welcome-message .emoji {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .welcome-message h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .welcome-message p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .quick-action {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-action:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: rgba(99,102,241,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="avatar">🏠</div>
+                <div class="header-info">
+                    <h1>Raymond Realty Chat</h1>
+                    <div class="status">
+                        <span class="status-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <div class="welcome-message">
+                <div class="emoji">💬</div>
+                <h2>Welcome to Raymond Realty!</h2>
+                <p>I'm your AI assistant. Ask me about properties, prices, locations, or anything about real estate.</p>
+                <div class="quick-actions">
+                    <button class="quick-action" onclick="sendQuickMessage('Show me properties in Thane')">Properties in Thane</button>
+                    <button class="quick-action" onclick="sendQuickMessage('What is my budget for 2 BHK?')">2 BHK Options</button>
+                    <button class="quick-action" onclick="sendQuickMessage('Tell me about amenities')">Amenities</button>
+                    <button class="quick-action" onclick="sendQuickMessage('Schedule a site visit')">Site Visit</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-row">
+                <div class="text-input-wrapper">
+                    <textarea
+                        class="text-input"
+                        id="textInput"
+                        placeholder="Type your message..."
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                </div>
+                <button class="btn btn-send" id="sendBtn" onclick="sendTextMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = 'chat_' + Date.now();
+        const messagesContainer = document.getElementById('messagesContainer');
+        const textInput = document.getElementById('textInput');
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendTextMessage();
+            }
+        }
+
+        function sendQuickMessage(text) {
+            textInput.value = text;
+            sendTextMessage();
+        }
+
+        function addMessage(role, text, properties = null) {
+            const welcome = messagesContainer.querySelector('.welcome-message');
+            if (welcome) welcome.remove();
+
+            const msg = document.createElement('div');
+            msg.className = 'message ' + role;
+
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            let html = `
+                <div class="message-avatar">${role === 'user' ? '👤' : '🏠'}</div>
+                <div class="message-content">
+                    <div class="message-bubble">${escapeHtml(text)}</div>
+                    <div class="message-time">${time}</div>
+            `;
+
+            if (properties && properties.length > 0) {
+                html += '<div class="property-cards">';
+                for (const p of properties) {
+                    html += `
+                        <div class="property-card">
+                            <h4>${escapeHtml(p.name)}</h4>
+                            <div class="price">₹ ${escapeHtml(p.price)}</div>
+                            <div class="details">${escapeHtml(p.bhk)} ${escapeHtml(p.type || '')} in ${escapeHtml(p.location)}<br>${p.area_sqft ? escapeHtml(String(p.area_sqft)) + ' sq.ft | ' : ''}${escapeHtml(p.possession || '')}</div>
+                            <div class="amenities">${p.amenities ? escapeHtml(p.amenities.join(' • ')) : ''}</div>
+                            <div class="property-links">
+                                ${p.property_url ? `<a href="${p.property_url}" target="_blank">View Details</a>` : ''}
+                                ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">Virtual Tour</a>` : ''}
+                                ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">Brochure</a>` : ''}
+                                ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                html += '</div>';
+            }
+
+            html += '</div>';
+            msg.innerHTML = html;
+            messagesContainer.appendChild(msg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showTyping() {
+            const typing = document.createElement('div');
+            typing.className = 'message assistant';
+            typing.id = 'typingIndicator';
+            typing.innerHTML = `
+                <div class="message-avatar">🏠</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typing);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        async function sendTextMessage() {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            textInput.value = '';
+            textInput.style.height = 'auto';
+            addMessage('user', text);
+            showTyping();
+
+            try {
+                const response = await fetch('/chat/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, session_id: sessionId })
+                });
+
+                const data = await response.json();
+                hideTyping();
+                addMessage('assistant', data.text, data.properties);
+            } catch (error) {
+                hideTyping();
+                addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+                console.error('Chat error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
