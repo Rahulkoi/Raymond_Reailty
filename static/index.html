@@ -529,6 +529,10 @@
         let conversationReady = false;
         let hasUserInteracted = false;
 
+        // Store conversation transcript for lead capture
+        let conversationTranscript = [];
+        let sessionId = 'voice_' + Date.now();
+
         let audioContext, analyser, microphone, processor, stream;
 
         const messagesContainer = document.getElementById('messagesContainer');
@@ -627,6 +631,8 @@
                         hasUserInteracted = true;
                         hideTyping();
                         addMessage('user', userText);
+                        // Store in transcript for lead capture
+                        conversationTranscript.push({ role: 'user', text: userText });
                         updateVoiceUI('processing');
                         showTyping();
                         prefetchPropertiesIfNeeded(userText);
@@ -637,6 +643,8 @@
                     const agentText = msg.agent_response_event?.agent_response || msg.agent_response;
                     if (agentText) {
                         hideTyping();
+                        // Store in transcript for lead capture
+                        conversationTranscript.push({ role: 'agent', text: agentText });
                         addMessage('assistant', agentText);
                         checkAndShowPropertyCards(agentText);
                     }
@@ -685,6 +693,45 @@
             isVoiceActive = false;
             updateVoiceUI('inactive');
             document.getElementById('connectionStatus').textContent = 'Click mic to start';
+
+            // Send transcript for lead capture if we have any conversation
+            if (conversationTranscript.length > 0) {
+                captureVoiceLead();
+            }
+        }
+
+        async function captureVoiceLead() {
+            if (conversationTranscript.length === 0) return;
+
+            try {
+                console.log('📞 Capturing voice lead from', conversationTranscript.length, 'messages');
+                const response = await fetch('/api/voice/capture-lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        transcript: conversationTranscript
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📞 Lead capture result:', data);
+                    if (data.success) {
+                        console.log('✅ Lead saved to Salesforce!');
+                    } else {
+                        console.log('⚠️ Could not save lead:', data.message);
+                        console.log('📞 Captured fields:', data.captured_fields);
+                        console.log('📞 Missing fields:', data.missing_fields);
+                    }
+                }
+            } catch (e) {
+                console.error('Error capturing voice lead:', e);
+            }
+
+            // Reset for next conversation
+            conversationTranscript = [];
+            sessionId = 'voice_' + Date.now();
         }
 
         async function startListening() {
@@ -855,7 +902,7 @@
         let prefetchedProperties = null;
 
         async function prefetchPropertiesIfNeeded(userText) {
-            const propertyQueries = ['show', 'property', 'properties', 'bhk', 'apartment', 'flat', 'looking for', 'find', 'search', 'available'];
+            const propertyQueries = ['show', 'property', 'properties', 'bhk', 'apartment', 'flat', 'looking for', 'find', 'search', 'available', 'bangalore', 'thane', 'mumbai', 'pune', 'whitefield', 'options', 'budget', 'crore', 'lakh', 'home', 'house', '1bhk', '2bhk', '3bhk', '4bhk', 'villa'];
             const text = userText.toLowerCase();
 
             const isPropertyQuery = propertyQueries.some(q => text.includes(q));
@@ -866,11 +913,14 @@
 
             try {
                 const searchQuery = extractSearchQuery(userText);
+                console.log('🔍 Prefetching properties for:', searchQuery);
                 const params = new URLSearchParams({ q: searchQuery });
                 const response = await fetch(`/api/properties/search?${params}`);
                 if (response.ok) {
                     const data = await response.json();
-                    prefetchedProperties = data.properties;
+                    // Store full response including fallback info
+                    prefetchedProperties = data;
+                    console.log('🔍 Prefetched', data.properties?.length || 0, 'properties, is_fallback:', data.is_fallback);
                 }
             } catch (e) {
                 console.error('Prefetch error:', e);
@@ -880,33 +930,60 @@
         async function checkAndShowPropertyCards(agentText) {
             if (!hasUserInteracted) return;
 
-            const propertyKeywords = ['property', 'properties', 'bhk', 'apartment', 'flat', 'home', 'house', 'bedroom', 'villa', 'residential', 'real estate', 'sq ft', 'sqft', 'crore', 'lakh', 'price', 'budget', 'available', 'options', 'recommend', 'here are', 'found', 'showing', 'check out'];
+            const propertyKeywords = ['property', 'properties', 'bhk', 'apartment', 'flat', 'home', 'house', 'bedroom', 'villa', 'residential', 'real estate', 'sq ft', 'sqft', 'crore', 'lakh', 'price', 'budget', 'available', 'options', 'recommend', 'here are', 'found', 'showing', 'check out', 'bangalore', 'thane', 'whitefield', 'great', 'perfect', 'excellent', 'wonderful'];
 
             const text = agentText.toLowerCase();
             const mentionsProperty = propertyKeywords.some(keyword => text.includes(keyword));
+
+            // If we have prefetched data, show it
+            if (prefetchedProperties && prefetchedProperties.properties && prefetchedProperties.properties.length > 0) {
+                console.log('📦 Showing prefetched properties:', prefetchedProperties.properties.length, 'is_fallback:', prefetchedProperties.is_fallback);
+                if (prefetchedProperties.is_fallback && prefetchedProperties.fallback_message) {
+                    showFallbackMessage(prefetchedProperties.fallback_message);
+                }
+                appendPropertyCards(prefetchedProperties.properties);
+                prefetchedProperties = null;
+                return;
+            }
+
             if (!mentionsProperty) return;
 
-            let properties = prefetchedProperties;
-
-            if (!properties || properties.length === 0) {
-                try {
-                    const searchQuery = extractSearchQuery(agentText);
-                    const params = new URLSearchParams({ q: searchQuery });
-                    const response = await fetch(`/api/properties/search?${params}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        properties = data.properties;
+            // Try to fetch properties based on agent response
+            try {
+                const searchQuery = extractSearchQuery(agentText);
+                console.log('🔍 Fetching properties from agent text:', searchQuery);
+                const params = new URLSearchParams({ q: searchQuery });
+                const response = await fetch(`/api/properties/search?${params}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.properties && data.properties.length > 0) {
+                        console.log('📦 Found', data.properties.length, 'properties, is_fallback:', data.is_fallback);
+                        if (data.is_fallback && data.fallback_message) {
+                            showFallbackMessage(data.fallback_message);
+                        }
+                        appendPropertyCards(data.properties);
                     }
-                } catch (e) {
-                    console.error('Property search error:', e);
                 }
+            } catch (e) {
+                console.error('Property search error:', e);
             }
 
             prefetchedProperties = null;
+        }
 
-            if (properties && properties.length > 0) {
-                appendPropertyCards(properties);
-            }
+        function showFallbackMessage(message) {
+            const msg = document.createElement('div');
+            msg.className = 'message assistant';
+            msg.innerHTML = `
+                <div class="message-avatar">🏠</div>
+                <div class="message-content">
+                    <div class="message-bubble" style="background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.1)); border: 1px solid rgba(245,158,11,0.3);">
+                        <span style="color: var(--warning);">ℹ️</span> ${escapeHtml(message)}
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(msg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         function extractSearchQuery(text) {
@@ -976,16 +1053,32 @@
             let cardsHtml = '<div class="property-cards" style="animation: slideIn 0.3s ease-out;">';
             for (const p of properties) {
                 const formattedPrice = formatPrice(p.price);
+                const pricePerSqft = p.price_per_sqft || (p.area_sqft && p.price ? Math.round(p.price / p.area_sqft) : null);
+
                 cardsHtml += `
                     <div class="property-card">
                         <h4>${escapeHtml(p.name)}</h4>
                         <div class="price">₹ ${escapeHtml(formattedPrice)}</div>
-                        <div class="details">${escapeHtml(p.bhk)} ${escapeHtml(p.type || '')} in ${escapeHtml(p.location)}<br>${p.area_sqft ? escapeHtml(String(p.area_sqft)) + ' sq.ft | ' : ''}${escapeHtml(p.possession || '')}</div>
-                        <div class="amenities">${p.amenities ? escapeHtml(p.amenities.join(' • ')) : ''}</div>
+                        <div class="details">
+                            <strong>${escapeHtml(p.bhk || '')}</strong> ${escapeHtml(p.type || 'Apartment')} in ${escapeHtml(p.location || '')}
+                            <br>
+                            ${p.area_sqft ? `📐 ${escapeHtml(String(p.area_sqft))} sq.ft` : ''}
+                            ${pricePerSqft ? ` • ₹${pricePerSqft.toLocaleString()}/sqft` : ''}
+                            <br>
+                            ${p.possession ? `🏠 ${escapeHtml(p.possession)}` : ''}
+                            ${p.builder ? ` • 🏗️ ${escapeHtml(p.builder)}` : ''}
+                        </div>
+                        ${p.nearby_metro || p.nearby_mall ? `
+                        <div class="nearby" style="font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0; line-height: 1.4;">
+                            ${p.nearby_metro ? `🚇 ${escapeHtml(p.nearby_metro)}<br>` : ''}
+                            ${p.nearby_mall ? `🛒 ${escapeHtml(p.nearby_mall)}` : ''}
+                        </div>
+                        ` : ''}
+                        <div class="amenities">${p.amenities ? escapeHtml(p.amenities.slice(0, 4).join(' • ')) : ''}</div>
                         <div class="property-links">
-                            ${p.property_url ? `<a href="${p.property_url}" target="_blank">View Details</a>` : ''}
-                            ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">Virtual Tour</a>` : ''}
-                            ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">Brochure</a>` : ''}
+                            ${p.property_url ? `<a href="${p.property_url}" target="_blank">📋 Details</a>` : ''}
+                            ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">🎥 Tour</a>` : ''}
+                            ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">📄 Brochure</a>` : ''}
                             ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
                         </div>
                     </div>

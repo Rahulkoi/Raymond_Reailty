@@ -1,5 +1,6 @@
 import os
 import time
+import httpx
 from typing import List, Dict
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -16,16 +17,21 @@ class OpenAIClient(LLMClient):
         assert api_key and api_key.strip().startswith("sk-"), \
             "OPENAI_API_KEY is missing or invalid"
 
-        self.client = OpenAI(api_key=api_key)
+        # PERFORMANCE: Use custom httpx client with optimized timeouts
+        http_client = httpx.Client(
+            timeout=httpx.Timeout(30.0, connect=5.0),
+            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
+        )
+        self.client = OpenAI(api_key=api_key, http_client=http_client)
 
     def generate(self, system_prompt: str, user_text: str, history: List[Dict] = None) -> str:
         start = time.time()
 
         messages = [{"role": "system", "content": system_prompt}]
 
-        # Add conversation history if provided
+        # Add conversation history if provided (limit to last 6 messages for speed)
         if history:
-            messages.extend(history)
+            messages.extend(history[-6:])
 
         # Add current user message
         messages.append({"role": "user", "content": user_text})
@@ -34,9 +40,9 @@ class OpenAIClient(LLMClient):
             model="gpt-4o-mini",
             messages=messages,
             # PERFORMANCE: Limit response length for faster generation
-            max_tokens=200,
+            max_tokens=150,
             # PERFORMANCE: Lower temperature = faster, more deterministic
-            temperature=0.7,
+            temperature=0.5,
         )
 
         result = response.choices[0].message.content

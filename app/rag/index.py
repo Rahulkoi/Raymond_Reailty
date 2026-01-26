@@ -1,9 +1,23 @@
 import json
 import os
 
+# PERFORMANCE: Singleton instance to avoid reloading
+_instance = None
+
 
 class PropertyIndex:
+    def __new__(cls):
+        """Singleton pattern for performance - only load properties once."""
+        global _instance
+        if _instance is None:
+            _instance = super().__new__(cls)
+            _instance._initialized = False
+        return _instance
+
     def __init__(self):
+        if self._initialized:
+            return
+
         # app/rag/index.py → go up to app/
         app_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -15,6 +29,9 @@ class PropertyIndex:
 
         with open(data_path, "r", encoding="utf-8") as f:
             self.properties = json.load(f)
+
+        print(f"📦 PropertyIndex loaded {len(self.properties)} properties")
+        self._initialized = True
 
     def search(self, location=None, max_price=None, bhk=None, property_type=None):
         """Search properties with multiple filters."""

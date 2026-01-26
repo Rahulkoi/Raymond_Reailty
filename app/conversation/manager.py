@@ -140,7 +140,7 @@ class ConversationManager:
         # Build farewell with summary
         name = self.lead_data.get("fullName", "").split()[0] if self.lead_data.get("fullName") else ""
 
-        # Only show properties if we found matching ones - don't show random
+        # If we found matching properties, show them
         if properties:
             property_cards = format_property_cards(
                 properties,
@@ -157,14 +157,28 @@ class ConversationManager:
                 "conversation_ended": True
             }
         else:
-            # No matching properties - custom message
-            print(f"🏠 No matching properties found")
-            farewell = f"Thanks{' ' + name if name else ''}! We don't have exact matches for your criteria right now, but our team will reach out with personalized options soon!"
+            # No matching properties - show Raymond Realty properties as fallback
+            print(f"🏠 No matching properties found, showing Raymond Realty fallback")
+            fallback_properties = retrieve_properties()  # Get all properties
+            raymond_properties = [p for p in fallback_properties if p.get('builder', '').lower() == 'raymond realty'][:5]
 
-            return {
-                "text": farewell,
-                "conversation_ended": True
-            }
+            if raymond_properties:
+                property_cards = format_property_cards(raymond_properties)
+                farewell = f"Great chatting{', ' + name if name else ''}! We don't have exact matches for your criteria, but here are some excellent Raymond Realty properties! Our team will call you soon with more options."
+
+                return {
+                    "text": farewell,
+                    "properties": property_cards,
+                    "conversation_ended": True,
+                    "is_fallback": True
+                }
+            else:
+                farewell = f"Thanks{' ' + name if name else ''}! Our team will reach out with personalized options soon!"
+
+                return {
+                    "text": farewell,
+                    "conversation_ended": True
+                }
 
     def _maybe_add_properties(self, result):
         """Add property suggestions only after we have lead info collected."""
@@ -193,7 +207,7 @@ class ConversationManager:
                 bhk=bhk
             )
 
-            # Only show properties if we found matching ones - don't show random
+            # If we found matching properties, show them
             if properties:
                 result["properties"] = format_property_cards(
                     properties,
@@ -202,7 +216,16 @@ class ConversationManager:
                     bhk=bhk
                 )
             else:
+                # No matching properties - show Raymond Realty properties as fallback
                 print(f"🏠 No matching properties for: location={location}, budget={max_price}, bhk={bhk}")
+                fallback_properties = retrieve_properties()  # Get all properties
+                raymond_properties = [p for p in fallback_properties if p.get('builder', '').lower() == 'raymond realty'][:5]
+
+                if raymond_properties:
+                    result["properties"] = format_property_cards(raymond_properties)
+                    result["is_fallback"] = True
+                    # Append fallback note to response text
+                    result["text"] = result.get("text", "") + " Since we don't have exact matches for your criteria, here are some excellent Raymond Realty properties!"
 
     def _add_to_history(self, user_text: str, assistant_text: str):
         """Add a conversation turn to history, maintaining max size."""
@@ -233,7 +256,7 @@ class ConversationManager:
         # Build response based on what we know
         name = self.lead_data.get("fullName", "").split()[0] if self.lead_data.get("fullName") else ""
 
-        # Only show properties if we found matching ones - don't show random
+        # If we found matching properties, show them
         if properties:
             property_cards = format_property_cards(
                 properties,
@@ -255,15 +278,32 @@ class ConversationManager:
                 "properties": property_cards
             }
         else:
-            # No matching properties - show custom message
-            print(f"🏠 No properties found for criteria")
-            if location:
-                text = f"Sorry, we don't have properties in {location} matching your criteria right now."
-            else:
-                text = "Sorry, we don't have properties matching your criteria right now."
-            text += " Let me know a different location or budget and I'll help you find options!"
+            # No matching properties - show Raymond Realty properties as fallback
+            print(f"🏠 No properties found for criteria, showing Raymond Realty fallback")
+            fallback_properties = retrieve_properties()  # Get all properties
+            raymond_properties = [p for p in fallback_properties if p.get('builder', '').lower() == 'raymond realty'][:5]
 
-            return {"text": text}
+            if raymond_properties:
+                property_cards = format_property_cards(raymond_properties)
+                search_criteria = []
+                if location:
+                    search_criteria.append(location)
+                if bhk:
+                    search_criteria.append(bhk)
+                criteria_text = " and ".join(search_criteria) if search_criteria else "your criteria"
+
+                text = f"We don't have exact matches for {criteria_text} right now, but here are some excellent Raymond Realty properties you might love!"
+                if not self.lead_data.get("mobileNumber"):
+                    text += " Share your number and our team will help find more options."
+
+                return {
+                    "text": text,
+                    "properties": property_cards,
+                    "is_fallback": True
+                }
+            else:
+                text = "Sorry, we don't have properties matching your criteria right now. Let me know a different location or budget!"
+                return {"text": text}
 
     def _handle_property_search(self):
         location = self.lead_data.get("city")
@@ -326,7 +366,7 @@ class ConversationManager:
 
         name = self.lead_data.get("fullName", "").split()[0] if self.lead_data.get("fullName") else ""
 
-        # Only show properties if we found matching ones - don't show random
+        # If we found matching properties, show them
         if properties:
             property_cards = format_property_cards(
                 properties,
@@ -339,11 +379,22 @@ class ConversationManager:
                 "properties": property_cards
             }
         else:
-            # No matching properties - show custom message, no random properties
+            # No matching properties - show Raymond Realty properties as fallback
             print(f"🏠 No properties found for: location={location}, budget={max_price}, bhk={bhk}")
-            return {
-                "text": f"Thanks{', ' + name if name else ''}! Got your details. We don't have exact matches for your criteria right now, but our team will reach out with personalized options soon!"
-            }
+            fallback_properties = retrieve_properties()  # Get all properties
+            raymond_properties = [p for p in fallback_properties if p.get('builder', '').lower() == 'raymond realty'][:5]
+
+            if raymond_properties:
+                property_cards = format_property_cards(raymond_properties)
+                return {
+                    "text": f"Thanks{', ' + name if name else ''}! Got your details. We don't have exact matches for your criteria, but here are some excellent Raymond Realty properties! Our team will also reach out with more personalized options.",
+                    "properties": property_cards,
+                    "is_fallback": True
+                }
+            else:
+                return {
+                    "text": f"Thanks{', ' + name if name else ''}! Got your details. Our team will reach out with personalized options soon!"
+                }
 
     # ================= HELPERS ================= #
 
@@ -467,7 +518,8 @@ CONVERSATION FLOW (follow this naturally):
 1. First, understand what they're looking for (area, budget, BHK)
 2. Show genuine interest and share relevant info about areas/properties
 3. If user asks to SEE PROPERTIES → show them immediately (intent: show_properties)
-4. Collect name and phone naturally when the moment feels right, but NEVER block property viewing
+4. IMPORTANT: Collect name, phone, and email naturally during conversation - these are REQUIRED for follow-up
+5. If you've discussed properties but don't have contact info yet, politely ask for it
 
 CURRENT CONTEXT:
 - Already collected: {collected_str}
@@ -483,9 +535,10 @@ CRITICAL RULE - SHOW PROPERTIES WHEN ASKED:
 WHAT TO DO NEXT:
 - If user asks to SEE/SHOW properties: intent = "show_properties", respond positively
 - If missing location/budget/BHK: Ask about their preferences naturally
-- If have preferences and user hasn't asked to see properties yet: You can ask for name/phone, but don't be pushy
+- CRITICAL: If you've shared property info but don't have name/phone/email, ask for them!
+- After showing properties, naturally ask: "Can I get your name and number so our team can arrange a site visit?"
 - If user says goodbye/bye/end/thanks/that's all/I'm done → intent: "end_conversation"
-- If have name AND phone AND user shared new info: intent = "create_lead"
+- If have name AND phone: intent = "create_lead" (email is bonus but try to get it)
 
 ENDING CONVERSATION:
 - When user wants to end (says "bye", "thanks", "that's all", "I'm done", "end conversation", "goodbye", etc.)

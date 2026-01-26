@@ -4,20 +4,39 @@ Property Search API - Lightweight endpoint for real-time property display
 
 import json
 import re
+import time
 from pathlib import Path
 from fastapi import APIRouter, Query
 from typing import Optional, List
+from functools import lru_cache
 
 router = APIRouter()
 
 # Load properties data
 PROPERTIES_FILE = Path(__file__).parent.parent / "data" / "properties.json"
 
+# PERFORMANCE: Cache properties in memory
+_properties_cache = None
+_cache_time = 0
+CACHE_TTL = 300  # 5 minutes
+
+
 def load_properties():
+    """Load properties with caching for better performance."""
+    global _properties_cache, _cache_time
+
+    # Return cached data if still valid
+    if _properties_cache is not None and (time.time() - _cache_time) < CACHE_TTL:
+        return _properties_cache
+
     try:
         with open(PROPERTIES_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
+            _properties_cache = json.load(f)
+            _cache_time = time.time()
+            print(f"📦 Loaded {len(_properties_cache)} properties into cache")
+            return _properties_cache
+    except Exception as e:
+        print(f"❌ Error loading properties: {e}")
         return []
 
 @router.get("/search")
@@ -32,11 +51,14 @@ async def search_properties(
     properties = load_properties()
     results = []
 
+    print(f"🔍 Property Search: q={q}, bhk={bhk}, location={location}, max_budget={max_budget}")
+
     # Extract BHK from query if not provided
     if not bhk and q:
         bhk_match = re.search(r'(\d)\s*bhk', q.lower())
         if bhk_match:
             bhk = bhk_match.group(1)
+            print(f"🔍 Extracted BHK: {bhk}")
 
     # Extract location keywords from query
     location_keywords = []
@@ -71,13 +93,18 @@ async def search_properties(
                 location_keywords.append(correct)
                 break
 
-        # Common locations
+        # Common locations and areas
         locations = ['thane', 'mumbai', 'bangalore', 'bengaluru', 'pune', 'navi mumbai',
                      'whitefield', 'electronic city', 'hsr', 'koramangala', 'indiranagar',
-                     'bandra', 'andheri', 'powai', 'worli', 'goregaon']
+                     'bandra', 'andheri', 'powai', 'worli', 'goregaon', 'varthur',
+                     'sarjapur', 'yelahanka', 'devanahalli', 'hebbal', 'marathahalli',
+                     'kr puram', 'btm', 'jayanagar', 'jp nagar', 'bannerghatta',
+                     'mysore road', 'tumkur road', 'hosur road', 'old airport road']
         for loc in locations:
             if loc in q_lower and loc not in location_keywords:
                 location_keywords.append(loc)
+
+    print(f"🔍 Location keywords: {location_keywords}")
 
     # Extract budget from query
     if not max_budget and q:
@@ -96,11 +123,17 @@ async def search_properties(
             if bhk not in prop_bhk and f"{bhk} bhk" not in prop_bhk:
                 continue
 
-        # Location filter
+        # Location filter - check location, city, and name fields
         if location_keywords:
             prop_location = prop.get('location', '').lower()
+            prop_city = prop.get('city', '').lower()
             prop_name = prop.get('name', '').lower()
-            if not any(loc in prop_location or loc in prop_name for loc in location_keywords):
+            # Check if any location keyword matches any of the property fields
+            location_match = any(
+                loc in prop_location or loc in prop_city or loc in prop_name
+                for loc in location_keywords
+            )
+            if not location_match:
                 continue
 
         # Budget filter (max_budget is in Cr)
@@ -127,8 +160,31 @@ async def search_properties(
 
         results.append(prop)
 
+    print(f"🔍 Found {len(results)} properties matching criteria")
+
+    # If no matches found, return Raymond Realty properties as fallback
+    is_fallback = False
+    fallback_properties = []
+
+    if len(results) == 0:
+        print("🔍 No matches found, returning Raymond Realty properties as fallback")
+        is_fallback = True
+        all_properties = load_properties()
+        # Get Raymond Realty properties
+        fallback_properties = [
+            p for p in all_properties
+            if p.get('builder', '').lower() == 'raymond realty'
+        ][:5]
+
     # Limit results
     return {
-        "properties": results[:5],
-        "total": len(results)
+        "properties": results[:5] if results else fallback_properties,
+        "total": len(results),
+        "is_fallback": is_fallback,
+        "fallback_message": "We don't have properties matching your exact criteria, but here are some excellent Raymond Realty properties you might like!" if is_fallback else None,
+        "filters_applied": {
+            "bhk": bhk,
+            "location_keywords": location_keywords,
+            "max_budget": max_budget
+        }
     }

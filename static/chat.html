@@ -510,7 +510,7 @@
             sendTextMessage();
         }
 
-        function addMessage(role, text, properties = null) {
+        function addMessage(role, text, properties = null, isFallback = false) {
             const welcome = messagesContainer.querySelector('.welcome-message');
             if (welcome) welcome.remove();
 
@@ -529,16 +529,31 @@
             if (properties && properties.length > 0) {
                 html += '<div class="property-cards">';
                 for (const p of properties) {
+                    const pricePerSqft = p.price_per_sqft || (p.area_sqft && p.price_raw ? Math.round(p.price_raw / p.area_sqft) : null);
                     html += `
                         <div class="property-card">
                             <h4>${escapeHtml(p.name)}</h4>
                             <div class="price">₹ ${escapeHtml(p.price)}</div>
-                            <div class="details">${escapeHtml(p.bhk)} ${escapeHtml(p.type || '')} in ${escapeHtml(p.location)}<br>${p.area_sqft ? escapeHtml(String(p.area_sqft)) + ' sq.ft | ' : ''}${escapeHtml(p.possession || '')}</div>
-                            <div class="amenities">${p.amenities ? escapeHtml(p.amenities.join(' • ')) : ''}</div>
+                            <div class="details">
+                                <strong>${escapeHtml(p.bhk || '')}</strong> ${escapeHtml(p.type || 'Apartment')} in ${escapeHtml(p.location || '')}
+                                <br>
+                                ${p.area_sqft ? `📐 ${escapeHtml(String(p.area_sqft))} sq.ft` : ''}
+                                ${pricePerSqft ? ` • ₹${pricePerSqft.toLocaleString()}/sqft` : ''}
+                                <br>
+                                ${p.possession ? `🏠 ${escapeHtml(p.possession)}` : ''}
+                                ${p.builder ? ` • 🏗️ ${escapeHtml(p.builder)}` : ''}
+                            </div>
+                            ${p.nearby_metro || p.nearby_mall ? `
+                            <div class="nearby" style="font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0; line-height: 1.4;">
+                                ${p.nearby_metro ? `🚇 ${escapeHtml(p.nearby_metro)}<br>` : ''}
+                                ${p.nearby_mall ? `🛒 ${escapeHtml(p.nearby_mall)}` : ''}
+                            </div>
+                            ` : ''}
+                            <div class="amenities">${p.amenities ? escapeHtml(p.amenities.slice(0, 4).join(' • ')) : ''}</div>
                             <div class="property-links">
-                                ${p.property_url ? `<a href="${p.property_url}" target="_blank">View Details</a>` : ''}
-                                ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">Virtual Tour</a>` : ''}
-                                ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">Brochure</a>` : ''}
+                                ${p.property_url ? `<a href="${p.property_url}" target="_blank">📋 Details</a>` : ''}
+                                ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">🎥 Tour</a>` : ''}
+                                ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">📄 Brochure</a>` : ''}
                                 ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
                             </div>
                         </div>
@@ -599,7 +614,7 @@
 
                 const data = await response.json();
                 hideTyping();
-                addMessage('assistant', data.text, data.properties);
+                addMessage('assistant', data.text, data.properties, data.is_fallback);
             } catch (error) {
                 hideTyping();
                 addMessage('assistant', 'Sorry, I encountered an error. Please try again.');

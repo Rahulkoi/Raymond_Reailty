@@ -11,6 +11,7 @@ from app.api.voice_chat_api import router as voice_chat_router
 from app.api.voice_stream_ws import router as voice_ws_router
 from app.api.elevenlabs_agent import router as elevenlabs_router
 from app.api.property_search import router as property_search_router
+from app.api.voice_lead_api import router as voice_lead_router
 
 app = FastAPI(title="AI Chat + CRM Bot")
 
@@ -29,6 +30,7 @@ app.include_router(voice_chat_router)
 app.include_router(voice_ws_router)
 app.include_router(elevenlabs_router, prefix="/elevenlabs", tags=["ElevenLabs Agent"])
 app.include_router(property_search_router, prefix="/api/properties", tags=["Property Search"])
+app.include_router(voice_lead_router, prefix="/api/voice", tags=["Voice Lead Capture"])
 
 # ---------------- ROOT ROUTE (FIX #1) ----------------
 @app.get("/")

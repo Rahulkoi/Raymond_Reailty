@@ -29,6 +29,154 @@
     "contact_number": "+91-80-4567-8901"
   },
   {
+  "id": "rr1",
+  "name": "Raymond Ten X Habitat",
+  "location": "Pokhran Road No. 2, Thane West",
+  "city": "Thane",
+  "price": 11500000,
+  "type": "Apartment",
+  "bhk": "2 BHK",
+  "area_sqft": 635,
+  "price_per_sqft": 18110,
+  "floor": "18th of 40",
+  "facing": "West",
+  "possession": "Under Construction",
+  "builder": "Raymond Realty",
+  "rera_id": "P51700020233",
+  "nearby_metro": "Thane Metro (Upcoming, 2 km)",
+  "nearby_mall": "Viviana Mall (1.5 km)",
+  "nearby_landmarks": ["Yeoor Hills", "Eastern Express Highway", "Upvan Lake"],
+  "amenities": [
+    "Swimming Pool",
+    "Sky Garden",
+    "Jogging Track",
+    "Clubhouse",
+    "24x7 Security",
+    "Multi-purpose Court"
+  ],
+  "description": "A premium lifestyle development offering modern homes with 10x better living experience.",
+  "property_url": "https://www.raymondrealty.in/projects/ten-x-habitat",
+  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/ten-x-habitat",
+  "brochure_url": "https://www.raymondrealty.in/brochures/ten-x-habitat.pdf",
+  "images": [
+    "https://www.raymondrealty.in/images/ten-x-habitat-1.jpg",
+    "https://www.raymondrealty.in/images/ten-x-habitat-2.jpg"
+  ],
+  "contact_number": "+91-22-6200-6000"
+},{
+  "id": "rr2",
+  "name": "Raymond Ten X Era",
+  "location": "Pokhran Road No. 1, Thane West",
+  "city": "Thane",
+  "price": 14500000,
+  "type": "Apartment",
+  "bhk": "3 BHK",
+  "area_sqft": 900,
+  "price_per_sqft": 16111,
+  "floor": "22nd of 45",
+  "facing": "North-East",
+  "possession": "Under Construction",
+  "builder": "Raymond Realty",
+  "rera_id": "P51700048032",
+  "nearby_metro": "Cadbury Junction Metro (Proposed)",
+  "nearby_mall": "Korum Mall (2 km)",
+  "nearby_landmarks": ["Raymond Compound", "Jupiter Hospital", "Eastern Express Highway"],
+  "amenities": [
+    "Infinity Pool",
+    "Business Lounge",
+    "Yoga Deck",
+    "Children’s Play Area",
+    "Indoor Games Room",
+    "24x7 CCTV"
+  ],
+  "description": "Ten X Era brings futuristic living with premium residences designed for urban families.",
+  "property_url": "https://www.raymondrealty.in/projects/ten-x-era",
+  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/ten-x-era",
+  "brochure_url": "https://www.raymondrealty.in/brochures/ten-x-era.pdf",
+  "images": [
+    "https://www.raymondrealty.in/images/ten-x-era-1.jpg",
+    "https://www.raymondrealty.in/images/ten-x-era-2.jpg"
+  ],
+  "contact_number": "+91-22-6200-6000"
+}
+,
+{
+  "id": "rr3",
+  "name": "Raymond Address by GS",
+  "location": "Bandra East, Mumbai",
+  "city": "Mumbai",
+  "price": 32500000,
+  "type": "Luxury Apartment",
+  "bhk": "3 BHK",
+  "area_sqft": 1150,
+  "price_per_sqft": 28260,
+  "floor": "30th of 50",
+  "facing": "South",
+  "possession": "Under Construction",
+  "builder": "Raymond Realty",
+  "rera_id": "P51800034567",
+  "nearby_metro": "BKC Metro (1 km)",
+  "nearby_mall": "Phoenix Marketcity Kurla (3 km)",
+  "nearby_landmarks": ["BKC", "MIG Cricket Club", "Western Express Highway"],
+  "amenities": [
+    "Concierge Service",
+    "Rooftop Lounge",
+    "Luxury Spa",
+    "Private Theatre",
+    "Valet Parking",
+    "High-speed Elevators"
+  ],
+  "description": "Ultra-luxury residences redefining skyline living in the heart of Mumbai.",
+  "property_url": "https://www.raymondrealty.in/projects/address-by-gs",
+  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/address-by-gs",
+  "brochure_url": "https://www.raymondrealty.in/brochures/address-by-gs.pdf",
+  "images": [
+    "https://www.raymondrealty.in/images/address-by-gs-1.jpg",
+    "https://www.raymondrealty.in/images/address-by-gs-2.jpg"
+  ],
+  "contact_number": "+91-22-6200-6000"
+}
+,
+{
+  "id": "rr4",
+  "name": "Raymond Invictus",
+  "location": "Pokhran Road No. 2, Thane West",
+  "city": "Thane",
+  "price": 22000000,
+  "type": "Luxury Apartment",
+  "bhk": "4 BHK",
+  "area_sqft": 1450,
+  "price_per_sqft": 15172,
+  "floor": "35th of 45",
+  "facing": "East",
+  "possession": "Under Construction",
+  "builder": "Raymond Realty",
+  "rera_id": "P51700051234",
+  "nearby_metro": "Thane Metro Line 4 (Planned)",
+  "nearby_mall": "Viviana Mall (2 km)",
+  "nearby_landmarks": ["Yeoor Hills", "Upvan Lake", "Raymond Township"],
+  "amenities": [
+    "Private Lobby",
+    "Sky Lounge",
+    "Swimming Pool",
+    "Fitness Studio",
+    "Library Lounge",
+    "EV Charging"
+  ],
+  "description": "Exclusive luxury residences crafted for the elite with unmatched privacy and views.",
+  "property_url": "https://www.raymondrealty.in/projects/invictus",
+  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/invictus",
+  "brochure_url": "https://www.raymondrealty.in/brochures/invictus.pdf",
+  "images": [
+    "https://www.raymondrealty.in/images/invictus-1.jpg",
+    "https://www.raymondrealty.in/images/invictus-2.jpg"
+  ],
+  "contact_number": "+91-22-6200-6000"
+}
+,
+,
+
+  {
     "id": "p2",
     "name": "Sobha Dream Acres",
     "location": "Balagere, Bangalore",
