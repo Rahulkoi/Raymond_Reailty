@@ -1,13 +1,17 @@
 import os
 import requests
 
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+
+def get_elevenlabs_api_key():
+    """Get API key - supports both naming conventions."""
+    return os.getenv("ELEVENLABS_API_KEY") or os.getenv("ELEVEN_LAB_API_KEY")
+
 
 def text_to_speech(text: str) -> bytes:
     url = "https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL"
 
     headers = {
-        "xi-api-key": ELEVENLABS_API_KEY,
+        "xi-api-key": get_elevenlabs_api_key(),
         "Content-Type": "application/json"
     }
 

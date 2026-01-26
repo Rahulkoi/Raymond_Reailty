@@ -1,14 +1,23 @@
 import os
 import requests
 
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
+
+def get_elevenlabs_api_key():
+    """Get API key - supports both naming conventions."""
+    return os.getenv("ELEVENLABS_API_KEY") or os.getenv("ELEVEN_LAB_API_KEY")
+
+
+def get_elevenlabs_voice_id():
+    """Get Voice ID - supports both naming conventions."""
+    return os.getenv("ELEVENLABS_VOICE_ID") or os.getenv("ELEVEN_LAB_VOICE_ID") or "Rachel"
+
 
 def elevenlabs_stream(text: str):
-    url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream?output_format=mp3_44100"
+    voice_id = get_elevenlabs_voice_id()
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream?output_format=mp3_44100"
 
     headers = {
-        "xi-api-key": ELEVENLABS_API_KEY,
+        "xi-api-key": get_elevenlabs_api_key(),
         "Content-Type": "application/json"
     }
 

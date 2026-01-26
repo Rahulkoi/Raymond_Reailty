@@ -15,7 +15,8 @@ DEFAULT_AGENT_ID = "agent_9801kfjxka9ke9fsrfzz3v81vm76"
 
 def get_elevenlabs_config():
     """Get ElevenLabs config - reads env vars at runtime, not module load time."""
-    api_key = os.getenv("ELEVENLABS_API_KEY")
+    # Support both naming conventions
+    api_key = os.getenv("ELEVENLABS_API_KEY") or os.getenv("ELEVEN_LAB_API_KEY")
     agent_id = os.getenv("ELEVENLABS_AGENT_ID", DEFAULT_AGENT_ID)
     return api_key, agent_id
 

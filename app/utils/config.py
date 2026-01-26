@@ -45,9 +45,9 @@ class VoiceConfig:
     TWILIO_AUTH_TOKEN = _required("TWILIO_AUTH_TOKEN")
     TWILIO_PHONE_NUMBER = _required("TWILIO_PHONE_NUMBER")
 
-    # ElevenLabs TTS Configuration
-    ELEVENLABS_API_KEY = _required("ELEVENLABS_API_KEY")
-    ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "Rachel")
+    # ElevenLabs TTS Configuration (support both naming conventions)
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY") or os.getenv("ELEVEN_LAB_API_KEY") or ""
+    ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID") or os.getenv("ELEVEN_LAB_VOICE_ID") or "Rachel"
     ELEVENLABS_MODEL = os.getenv("ELEVENLABS_MODEL", "eleven_multilingual_v2")
     # Voice settings for natural speech
     ELEVENLABS_SPEED = float(os.getenv("ELEVENLABS_SPEED", "1.0"))  # 0.7 - 1.2 range

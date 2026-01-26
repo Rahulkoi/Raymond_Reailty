@@ -5,13 +5,27 @@ from typing import Generator
 from elevenlabs.client import ElevenLabs
 from elevenlabs import VoiceSettings
 
-client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+
+def get_elevenlabs_api_key():
+    """Get API key - supports both naming conventions."""
+    return os.getenv("ELEVENLABS_API_KEY") or os.getenv("ELEVEN_LAB_API_KEY")
+
+
+def get_elevenlabs_voice_id():
+    """Get Voice ID - supports both naming conventions."""
+    return os.getenv("ELEVENLABS_VOICE_ID") or os.getenv("ELEVEN_LAB_VOICE_ID") or "Rachel"
+
+
+def get_client():
+    """Get ElevenLabs client - creates at runtime to ensure env vars are loaded."""
+    return ElevenLabs(api_key=get_elevenlabs_api_key())
+
 
 AUDIO_DIR = "static/audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 # Voice configuration from environment
-VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "Rachel")
+VOICE_ID = None  # Will be set at runtime
 
 # PERFORMANCE: Use turbo model for English (2-3x faster), multilingual for other languages
 # Options: eleven_turbo_v2_5 (fastest), eleven_turbo_v2, eleven_multilingual_v2
@@ -46,8 +60,11 @@ def text_to_speech(text: str, language: str = None) -> str:
         text: Text to convert to speech
         language: Optional language code (e.g., 'hi' for Hindi, 'ta' for Tamil)
     """
+    client = get_client()
+    voice_id = get_elevenlabs_voice_id()
+
     audio = client.text_to_speech.convert(
-        voice_id=VOICE_ID,
+        voice_id=voice_id,
         model_id=MODEL_ID,
         text=text,
         voice_settings=_get_voice_settings(),
@@ -72,6 +89,8 @@ def text_to_speech_bytes(text: str, language: str = None) -> bytes:
         language: Optional language code (e.g., 'hi' for Hindi, 'ta' for Tamil)
     """
     start = time.time()
+    client = get_client()
+    voice_id = get_elevenlabs_voice_id()
 
     # Use multilingual model for non-English to preserve accent quality
     model = MODEL_ID
@@ -79,7 +98,7 @@ def text_to_speech_bytes(text: str, language: str = None) -> bytes:
         model = "eleven_multilingual_v2"
 
     audio = client.text_to_speech.convert(
-        voice_id=VOICE_ID,
+        voice_id=voice_id,
         model_id=model,
         text=text,
         voice_settings=_get_voice_settings(),
@@ -106,6 +125,8 @@ def text_to_speech_stream(text: str, language: str = None) -> Generator[bytes, N
     start = time.time()
     first_chunk_time = None
     total_bytes = 0
+    client = get_client()
+    voice_id = get_elevenlabs_voice_id()
 
     # Use multilingual model for non-English
     model = MODEL_ID
@@ -114,7 +135,7 @@ def text_to_speech_stream(text: str, language: str = None) -> Generator[bytes, N
 
     # Get streaming generator from ElevenLabs
     audio_stream = client.text_to_speech.convert(
-        voice_id=VOICE_ID,
+        voice_id=voice_id,
         model_id=model,
         text=text,
         voice_settings=_get_voice_settings(),
