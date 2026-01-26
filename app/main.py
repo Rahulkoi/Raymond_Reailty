@@ -44,6 +44,21 @@ def root():
 def health():
     return {"status": "ok"}
 
+
+# ---------------- DEBUG: Check ENV VARS (remove in production) ----------------
+@app.get("/debug/env")
+def debug_env():
+    """Debug endpoint to verify environment variables are loaded. REMOVE IN PRODUCTION."""
+    import os
+    return {
+        "ELEVENLABS_API_KEY": "SET" if os.getenv("ELEVENLABS_API_KEY") else "NOT SET",
+        "ELEVENLABS_AGENT_ID": os.getenv("ELEVENLABS_AGENT_ID", "using default"),
+        "OPENAI_API_KEY": "SET" if os.getenv("OPENAI_API_KEY") else "NOT SET",
+        "SF_CLIENT_ID": "SET" if os.getenv("SF_CLIENT_ID") else "NOT SET",
+        "env_var_count": len([k for k in os.environ.keys()]),
+        "hint": "If vars show NOT SET, add them in Render Dashboard > Environment"
+    }
+
 # ---------------- STATIC FILES (FIX #2) ----------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 static_dir = BASE_DIR / "static"

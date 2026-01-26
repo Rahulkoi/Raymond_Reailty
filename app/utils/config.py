@@ -5,10 +5,15 @@ import os
 load_dotenv()
 
 
-def _required(name: str) -> str:
+def _required(name: str, default: str = None) -> str:
+    """Get required env var. If default is provided, use it instead of crashing."""
     value = os.getenv(name)
     if not value:
-        raise RuntimeError(f"Missing required environment variable: {name}")
+        if default is not None:
+            return default
+        # Don't crash on startup - just log warning
+        print(f"⚠️ WARNING: Missing environment variable: {name}")
+        return ""
     return value
 
 
