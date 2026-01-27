@@ -4,6 +4,18 @@ import os
 # PERFORMANCE: Singleton instance to avoid reloading
 _instance = None
 
+# Location normalization for flexible matching
+LOCATION_ALIASES = {
+    "banglore": "bangalore",
+    "bengalor": "bangalore",
+    "bangalor": "bangalore",
+    "bengaluru": "bangalore",
+    "blr": "bangalore",
+    "thana": "thane",
+    "bombay": "mumbai",
+    "white field": "whitefield",
+}
+
 
 class PropertyIndex:
     def __new__(cls):
@@ -39,14 +51,20 @@ class PropertyIndex:
 
         # Filter by location (matches location field or nearby landmarks)
         if location:
-            location_lower = location.lower()
+            location_lower = location.lower().strip()
+            # Normalize location using aliases (handle misspellings)
+            normalized_location = LOCATION_ALIASES.get(location_lower, location_lower)
+
             results = [
                 p for p in results
-                if location_lower in p.get("location", "").lower()
+                if normalized_location in p.get("location", "").lower()
+                or normalized_location in p.get("city", "").lower()
+                or location_lower in p.get("location", "").lower()  # Also try original
                 or location_lower in p.get("city", "").lower()
-                or any(location_lower in landmark.lower() for landmark in p.get("nearby_landmarks", []))
-                or location_lower in p.get("nearby_metro", "").lower()
+                or any(normalized_location in landmark.lower() for landmark in p.get("nearby_landmarks", []))
+                or normalized_location in p.get("nearby_metro", "").lower()
             ]
+            print(f"🔍 Property search: location='{location}' (normalized: '{normalized_location}'), found {len(results)} properties")
 
         # Filter by max price
         if max_price:

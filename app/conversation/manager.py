@@ -1,11 +1,42 @@
 print("🔥 LOADING ConversationManager")
 
 import json
+import re
 from app.llm.openai_client import OpenAIClient
 from app.rag.retriever import retrieve_properties
 from app.response.response_builder import format_property_response, format_property_response_with_links, format_property_cards
 
 MAX_HISTORY_TURNS = 10  # Keep last N turns to avoid token overflow
+
+# Known locations for fallback extraction (includes common misspellings/phonetic variations)
+KNOWN_LOCATIONS = {
+    # Bangalore variations
+    "bangalore": "Bangalore",
+    "bengaluru": "Bangalore",
+    "banglore": "Bangalore",  # Common misspelling
+    "bangalor": "Bangalore",  # Phonetic variation
+    "bengalor": "Bangalore",
+    "blr": "Bangalore",
+    # Thane variations
+    "thane": "Thane",
+    "thana": "Thane",
+    # Mumbai variations
+    "mumbai": "Mumbai",
+    "bombay": "Mumbai",
+    # Bangalore sub-areas
+    "whitefield": "Whitefield",
+    "white field": "Whitefield",
+    "electronic city": "Electronic City",
+    "sarjapur": "Sarjapur Road",
+    "yelahanka": "Yelahanka",
+    "devanahalli": "Devanahalli",
+    "koramangala": "Koramangala",
+    "indiranagar": "Indiranagar",
+    "hsr layout": "HSR Layout",
+    "jp nagar": "JP Nagar",
+    "hebbal": "Hebbal",
+    "manyata": "Manyata Tech Park",
+}
 
 
 class ConversationManager:
@@ -14,10 +45,14 @@ class ConversationManager:
         self.lead_data = {}
         self.lead_created = False
         self.history = []  # Conversation history: [{role, content}, ...]
+        self.current_user_text = ""  # Store current user text for handlers
 
     # ================= MAIN ENTRY ================= #
 
     def handle_user_input(self, user_text: str):
+        # Store for use in handlers
+        self.current_user_text = user_text
+
         raw = self.llm.generate(
             system_prompt=self._system_prompt(),
             user_text=user_text,
@@ -29,8 +64,11 @@ class ConversationManager:
         args = data.get("arguments", {})
         response_text = data.get("response", "")
 
-        # 🧠 Always extract lead info silently
+        # 🧠 Always extract lead info from LLM response
         self._extract_lead_entities(args)
+
+        # 🧠 Fallback: Extract entities directly from user text (in case LLM missed them)
+        self._extract_entities_from_text(user_text)
 
         # Backup check for end conversation - if user says bye/thanks/end
         end_phrases = ["bye", "goodbye", "thanks", "thank you", "that's all", "thats all", "end conversation", "i'm done", "im done", "see you", "talk later"]
@@ -43,6 +81,17 @@ class ConversationManager:
         show_now_phrases = ["show me", "show property", "show properties", "see property", "see properties",
                            "right now", "right here", "display", "list properties", "what properties"]
         user_wants_properties_now = any(phrase in user_text.lower() for phrase in show_now_phrases)
+
+        # Check if user is asking about properties in a location (property search)
+        property_search_phrases = ["property in", "properties in", "flat in", "flats in", "apartment in",
+                                   "apartments in", "house in", "houses in", "home in", "homes in",
+                                   "looking for", "interested in", "do you have", "any property"]
+        user_asking_property_search = any(phrase in user_lower for phrase in property_search_phrases)
+
+        # Override intent if user is clearly asking about properties but LLM returned wrong intent
+        if user_asking_property_search and intent not in ["property_search", "show_properties", "end_conversation"]:
+            print(f"🔄 Overriding intent from '{intent}' to 'property_search' based on user text")
+            intent = "property_search"
 
         # Determine final response based on intent
         if intent == "end_conversation":
@@ -412,6 +461,58 @@ class ConversationManager:
             for k in keys:
                 if k in args and args[k]:
                     self.lead_data[field] = args[k]
+
+    def _extract_entities_from_text(self, user_text: str):
+        """Fallback extraction for entities from raw user text when LLM misses them."""
+        text_lower = user_text.lower()
+
+        # Extract location if not already captured
+        if not self.lead_data.get("city"):
+            for keyword, location in KNOWN_LOCATIONS.items():
+                if keyword in text_lower:
+                    self.lead_data["city"] = location
+                    print(f"📍 Fallback extracted location: {location}")
+                    break
+
+        # Extract phone number (Indian 10-digit starting with 6-9)
+        if not self.lead_data.get("mobileNumber"):
+            phone_pattern = r'\b[6-9]\d{9}\b'
+            phone_match = re.search(phone_pattern, user_text)
+            if phone_match:
+                self.lead_data["mobileNumber"] = phone_match.group()
+                print(f"📞 Fallback extracted phone: {phone_match.group()}")
+
+        # Extract name from common patterns
+        if not self.lead_data.get("fullName"):
+            name_patterns = [
+                r"(?:i am|i'm|my name is|this is|call me|it's|its)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)",
+                r"^([A-Z][a-z]+)$",  # Single capitalized word (might be name)
+            ]
+            for pattern in name_patterns:
+                match = re.search(pattern, user_text, re.IGNORECASE)
+                if match:
+                    name = match.group(1).strip().title()
+                    # Skip common non-name words
+                    if name.lower() not in ["yes", "no", "ok", "okay", "sure", "thanks", "hi", "hello", "bye"]:
+                        self.lead_data["fullName"] = name
+                        print(f"👤 Fallback extracted name: {name}")
+                        break
+
+        # Extract email
+        if not self.lead_data.get("emailAddress"):
+            email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+            email_match = re.search(email_pattern, user_text)
+            if email_match:
+                self.lead_data["emailAddress"] = email_match.group()
+                print(f"📧 Fallback extracted email: {email_match.group()}")
+
+        # Extract BHK preference
+        if not self.lead_data.get("configuration"):
+            bhk_pattern = r'\b([1-4])\s*(?:bhk|bedroom|bed)\b'
+            bhk_match = re.search(bhk_pattern, text_lower)
+            if bhk_match:
+                self.lead_data["configuration"] = f"{bhk_match.group(1)} BHK"
+                print(f"🏠 Fallback extracted BHK: {bhk_match.group(1)} BHK")
 
     def _missing_lead_fields(self):
         required = [
