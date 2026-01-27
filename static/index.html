@@ -4,1110 +4,432 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raymond Realty - Voice Assistant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #0ea5e9;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #475569;
-            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background-image:
-                radial-gradient(at 20% 80%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
-                radial-gradient(at 80% 20%, rgba(14, 165, 233, 0.15) 0, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0, transparent 50%);
         }
-
-        .chat-container {
+        .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 500px;
             height: 90vh;
-            max-height: 800px;
-            background: var(--bg-card);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
+            background: #1e293b;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
-
-        .chat-header {
-            padding: 20px 24px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, #6366f1, #0ea5e9);
+            text-align: center;
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-info h1 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .header-info .status {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.8);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse-dot 2s infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .language-select {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            outline: none;
-            backdrop-filter: blur(10px);
-        }
-
-        .language-select option {
-            background: var(--bg-card);
-            color: var(--text-primary);
-        }
-
-        .messages-container {
+        .header h1 { font-size: 1.2rem; }
+        .header .status { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+        .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            scroll-behavior: smooth;
-        }
-
-        .messages-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-
-        .message {
-            display: flex;
             gap: 12px;
+        }
+        .message {
             max-width: 85%;
-            animation: slideIn 0.3s ease-out;
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s;
         }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         .message.user {
             align-self: flex-end;
-            flex-direction: row-reverse;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
         }
-
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
+        .message.bot {
+            align-self: flex-start;
+            background: #334155;
         }
-
-        .message.assistant .message-avatar {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-        .message.user .message-avatar {
-            background: var(--bg-input);
-        }
-
-        .message-content {
+        .property-cards {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-        }
-
-        .message.user .message-content {
-            align-items: flex-end;
-        }
-
-        .message-bubble {
-            padding: 14px 18px;
-            border-radius: 18px;
-            line-height: 1.5;
-            font-size: 0.95rem;
-        }
-
-        .message.assistant .message-bubble {
-            background: var(--bg-input);
-            border-bottom-left-radius: 6px;
-        }
-
-        .message.user .message-bubble {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-bottom-right-radius: 6px;
-        }
-
-        .message-time {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            padding: 0 8px;
-        }
-
-        .property-cards {
-            display: grid;
             gap: 12px;
-            margin-top: 12px;
+            margin-top: 16px;
+            animation: fadeIn 0.5s;
         }
-
         .property-card {
-            background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(14,165,233,0.05));
-            border: 1px solid rgba(99,102,241,0.2);
+            background: linear-gradient(145deg, rgba(99,102,241,0.15), rgba(14,165,233,0.1));
+            border: 1px solid rgba(99,102,241,0.3);
             border-radius: 16px;
             padding: 16px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
-
         .property-card:hover {
-            border-color: var(--primary);
+            border-color: #6366f1;
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99,102,241,0.2);
+            box-shadow: 0 8px 25px rgba(99,102,241,0.2);
         }
-
         .property-card h4 {
-            color: var(--primary-light);
-            font-size: 1rem;
+            color: #818cf8;
             margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 1.05rem;
         }
-
         .property-card .price {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--success);
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.25rem;
             margin-bottom: 8px;
         }
-
         .property-card .details {
+            color: #94a3b8;
             font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            line-height: 1.5;
+            margin-bottom: 10px;
+            line-height: 1.6;
         }
-
-        .property-card .amenities {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-        }
-
-        .property-links {
+        .property-card .links {
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
+            flex-wrap: wrap;
         }
-
-        .property-links a {
-            background: rgba(99,102,241,0.15);
-            color: var(--primary-light);
-            padding: 6px 14px;
+        .property-card .links a {
+            background: rgba(99,102,241,0.2);
+            color: #818cf8;
+            padding: 8px 14px;
             border-radius: 20px;
             text-decoration: none;
             font-size: 0.8rem;
             font-weight: 500;
             transition: all 0.2s;
-            border: 1px solid transparent;
         }
-
-        .property-links a:hover {
-            background: var(--primary);
+        .property-card .links a:hover {
+            background: #6366f1;
             color: white;
-            border-color: var(--primary);
         }
-
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 16px 20px;
-            background: var(--bg-input);
-            border-radius: 18px;
-            border-bottom-left-radius: 6px;
-            width: fit-content;
-        }
-
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            background: var(--text-muted);
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-8px); }
-        }
-
-        .input-area {
-            padding: 20px 24px;
-            background: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .voice-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: rgba(99,102,241,0.1);
-            border-radius: 12px;
-        }
-
-        .voice-status.listening {
-            background: rgba(239,68,68,0.15);
-            border: 1px solid rgba(239,68,68,0.3);
-        }
-
-        .voice-status.processing {
+        .fallback-notice {
             background: rgba(245,158,11,0.15);
             border: 1px solid rgba(245,158,11,0.3);
-        }
-
-        .voice-status.speaking {
-            background: rgba(16,185,129,0.15);
-            border: 1px solid rgba(16,185,129,0.3);
-        }
-
-        .voice-status-text {
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
             font-size: 0.9rem;
-            font-weight: 500;
+            color: #fbbf24;
         }
-
-        .voice-status.listening .voice-status-text { color: var(--danger); }
-        .voice-status.processing .voice-status-text { color: var(--warning); }
-        .voice-status.speaking .voice-status-text { color: var(--success); }
-
-        .audio-visualizer {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            height: 24px;
+        .controls {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            text-align: center;
         }
-
-        .audio-bar {
-            width: 4px;
-            background: currentColor;
-            border-radius: 2px;
-            transition: height 0.05s ease;
+        .voice-status {
+            margin-bottom: 16px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9rem;
         }
-
-        .voice-controls {
-            display: flex;
-            justify-content: center;
-        }
-
+        .voice-status.listening { background: rgba(239,68,68,0.2); color: #f87171; }
+        .voice-status.speaking { background: rgba(16,185,129,0.2); color: #34d399; }
         .btn-voice {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 3px solid #475569;
+            background: #334155;
+            color: #94a3b8;
             font-size: 2rem;
+            cursor: pointer;
             transition: all 0.2s;
-            background: var(--bg-input);
-            color: var(--text-secondary);
-            border: 3px solid var(--border);
         }
-
-        .btn-voice:hover {
-            border-color: var(--primary);
-            color: var(--primary-light);
-        }
-
-        .btn-voice.listening {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            border-color: var(--danger);
+        .btn-voice:hover { border-color: #6366f1; }
+        .btn-voice.active {
+            background: #ef4444;
+            border-color: #ef4444;
             color: white;
-            animation: pulse-voice 1.5s infinite;
+            animation: pulse 1.5s infinite;
         }
-
-        @keyframes pulse-voice {
+        @keyframes pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
             50% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
         }
-
-        .btn-voice.processing {
-            background: var(--warning);
-            border-color: var(--warning);
-            color: white;
-        }
-
-        .btn-voice.speaking {
-            background: var(--success);
-            border-color: var(--success);
-            color: white;
-            animation: pulse-speaking 1s infinite;
-        }
-
-        @keyframes pulse-speaking {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
-            50% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
-        }
-
-        @media (max-width: 600px) {
-            body { padding: 0; }
-            .chat-container {
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-            .chat-header { padding: 16px; }
-            .messages-container { padding: 16px; }
-            .input-area { padding: 16px; }
-            .message { max-width: 90%; }
-        }
-
-        .welcome-message {
-            text-align: center;
-            padding: 40px 20px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .welcome-message .emoji {
-            font-size: 3rem;
-            margin-bottom: 16px;
-        }
-
-        .welcome-message h2 {
-            font-size: 1.3rem;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .welcome-message p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            max-width: 400px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
+        .typing { display: flex; gap: 4px; padding: 12px 16px; background: #334155; border-radius: 16px; width: fit-content; }
+        .typing span { width: 8px; height: 8px; background: #64748b; border-radius: 50%; animation: bounce 1.4s infinite; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="header-left">
-                <div class="avatar">🏠</div>
-                <div class="header-info">
-                    <h1>Raymond Realty Voice</h1>
-                    <div class="status">
-                        <span class="status-dot"></span>
-                        <span id="connectionStatus">Click mic to start</span>
-                    </div>
-                </div>
-            </div>
-            <select class="language-select" id="languageSelect">
-                <option value="">Auto-detect</option>
-                <option value="en">English</option>
-                <option value="hi">Hindi</option>
-                <option value="ta">Tamil</option>
-                <option value="te">Telugu</option>
-                <option value="kn">Kannada</option>
-                <option value="ml">Malayalam</option>
-                <option value="bn">Bengali</option>
-                <option value="mr">Marathi</option>
-                <option value="gu">Gujarati</option>
-                <option value="pa">Punjabi</option>
-            </select>
+    <div class="container">
+        <div class="header">
+            <h1>Raymond Realty Voice</h1>
+            <div class="status" id="status">Click mic to start</div>
         </div>
-
-        <div class="messages-container" id="messagesContainer">
-            <div class="welcome-message">
-                <div class="emoji">🎤</div>
-                <h2>Voice Assistant Ready</h2>
-                <p>Click the microphone button below to start talking. Ask about properties, prices, or schedule a visit!</p>
-            </div>
+        <div class="messages" id="messages">
+            <div class="message bot">Hi! Click the microphone to start talking with me about properties.</div>
         </div>
-
-        <div class="input-area">
-            <div class="voice-status" id="voiceStatus">
-                <div class="audio-visualizer" id="audioVisualizer"></div>
-                <span class="voice-status-text" id="voiceStatusText">Click mic to start</span>
-            </div>
-            <div class="voice-controls">
-                <button class="btn-voice" id="voiceBtn" onclick="toggleVoice()">🎤</button>
-            </div>
+        <div class="controls">
+            <div class="voice-status" id="voiceStatus">Ready</div>
+            <button class="btn-voice" id="voiceBtn" onclick="toggleVoice()">🎤</button>
         </div>
     </div>
 
     <script>
         let ws = null;
-        let isVoiceActive = false;
-        let isListening = false;
-        let isSpeaking = false;
-        let conversationReady = false;
-        let hasUserInteracted = false;
-
-        // Store conversation transcript for lead capture
-        let conversationTranscript = [];
-        let sessionId = 'voice_' + Date.now();
-
+        let isActive = false;
         let audioContext, analyser, microphone, processor, stream;
+        let audioQueue = [];
+        let isPlaying = false;
+        let currentSource = null;
+        let playbackCtx = null;
+        let propertiesShown = false;
 
-        const messagesContainer = document.getElementById('messagesContainer');
+        // Conversation tracking
+        let transcript = [];
+        let sessionId = 'session_' + Date.now();
+
+        const messagesEl = document.getElementById('messages');
         const voiceBtn = document.getElementById('voiceBtn');
         const voiceStatus = document.getElementById('voiceStatus');
-        const voiceStatusText = document.getElementById('voiceStatusText');
-        const audioVisualizer = document.getElementById('audioVisualizer');
+        const statusEl = document.getElementById('status');
 
-        // Initialize audio visualizer bars
-        for (let i = 0; i < 5; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'audio-bar';
-            bar.style.height = '4px';
-            audioVisualizer.appendChild(bar);
-        }
-
-        function toggleVoice() {
-            if (isVoiceActive) {
-                if (isSpeaking) {
-                    interruptBot();
-                } else {
-                    stopVoice();
-                }
+        async function toggleVoice() {
+            if (isActive) {
+                endConversation();
             } else {
-                startVoice();
+                startConversation();
             }
         }
 
-        function interruptBot() {
-            console.log('Manual interrupt triggered');
-            stopAudioPlayback();
-            hideTyping();
-            updateVoiceUI('listening');
-        }
-
-        async function startVoice() {
-            updateVoiceUI('processing');
-            document.getElementById('connectionStatus').textContent = 'Connecting...';
-
+        async function startConversation() {
+            propertiesShown = false;
             try {
-                const response = await fetch('/elevenlabs/get-signed-url');
-                if (!response.ok) {
-                    const errorData = await response.text();
-                    console.error('Server error:', response.status, errorData);
-                    throw new Error(`Server error ${response.status}: ${errorData}`);
-                }
-                const data = await response.json();
-                console.log('Got signed URL:', data.signed_url ? 'Yes' : 'No');
+                statusEl.textContent = 'Connecting...';
 
-                ws = new WebSocket(data.signed_url);
+                const res = await fetch('/elevenlabs/get-signed-url');
+                if (!res.ok) throw new Error('Failed to get signed URL');
+                const { signed_url } = await res.json();
 
-                ws.onopen = async () => {
-                    console.log('Connected to ElevenLabs agent');
-                    isVoiceActive = true;
-                    conversationReady = false;
-                    document.getElementById('connectionStatus').textContent = 'Initializing...';
-                    await startListening();
+                ws = new WebSocket(signed_url);
+
+                ws.onopen = () => {
+                    console.log('Connected to ElevenLabs');
+                    isActive = true;
+                    statusEl.textContent = 'Connected';
+                    startMicrophone();
                 };
 
-                ws.onmessage = (event) => {
-                    const msg = JSON.parse(event.data);
-                    handleAgentMessage(msg);
-                };
-
-                ws.onerror = (e) => {
-                    console.error('WebSocket error:', e);
-                    stopVoice();
-                };
-
-                ws.onclose = () => {
-                    console.log('Disconnected from agent');
-                    if (isVoiceActive) stopVoice();
-                };
+                ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
+                ws.onerror = (e) => { console.error('WS error:', e); endConversation(); };
+                ws.onclose = () => { if (isActive) endConversation(); };
 
             } catch (e) {
-                console.error('Failed to start voice:', e);
-                updateVoiceUI('inactive');
-                document.getElementById('connectionStatus').textContent = 'Connection failed';
+                console.error('Connection failed:', e);
+                statusEl.textContent = 'Connection failed';
             }
         }
 
-        function handleAgentMessage(msg) {
-            console.log('Agent message:', msg.type, msg);
+        function handleMessage(msg) {
+            console.log('Message:', msg.type);
 
             switch (msg.type) {
                 case 'conversation_initiation_metadata':
-                    console.log('Conversation ready! Agent initialized.');
-                    conversationReady = true;
-                    document.getElementById('connectionStatus').textContent = 'Voice Connected';
-                    updateVoiceUI('listening');
+                    statusEl.textContent = 'Ready - Speak now';
+                    updateUI('listening');
                     break;
 
                 case 'user_transcript':
                     const userText = msg.user_transcription_event?.user_transcript || msg.user_transcript;
                     if (userText) {
-                        hasUserInteracted = true;
                         hideTyping();
                         addMessage('user', userText);
-                        // Store in transcript for lead capture
-                        conversationTranscript.push({ role: 'user', text: userText });
-                        updateVoiceUI('processing');
+                        transcript.push({ role: 'user', text: userText });
                         showTyping();
-                        prefetchPropertiesIfNeeded(userText);
                     }
                     break;
 
                 case 'agent_response':
-                    const agentText = msg.agent_response_event?.agent_response || msg.agent_response;
-                    if (agentText) {
+                    const botText = msg.agent_response_event?.agent_response || msg.agent_response;
+                    if (botText) {
                         hideTyping();
-                        // Store in transcript for lead capture
-                        conversationTranscript.push({ role: 'agent', text: agentText });
-                        addMessage('assistant', agentText);
-                        checkAndShowPropertyCards(agentText);
+                        addMessage('bot', botText);
+                        transcript.push({ role: 'agent', text: botText });
+
+                        // Check if conversation is ending - expanded patterns
+                        const lower = botText.toLowerCase();
+                        const endingPhrases = [
+                            'goodbye', 'bye', 'take care', 'talk soon',
+                            'will call you', 'will contact', 'have a great day',
+                            'nice talking', 'thank you for', 'thanks for',
+                            'been a pleasure', 'look forward', 'speak soon',
+                            'reach out', 'get back to you', 'will be in touch'
+                        ];
+                        const isEnding = endingPhrases.some(phrase => lower.includes(phrase));
+
+                        console.log('Agent response:', botText);
+                        console.log('Is ending phrase:', isEnding, 'Properties shown:', propertiesShown);
+
+                        if (isEnding && !propertiesShown) {
+                            propertiesShown = true;
+                            console.log('Showing properties and capturing lead...');
+                            setTimeout(() => showPropertiesAndCaptureLead(), 500);
+                        }
                     }
-                    updateVoiceUI('speaking');
                     break;
 
                 case 'audio':
-                    const audioBase64 = msg.audio_event?.audio_base_64 || msg.audio;
-                    if (audioBase64) {
-                        queueAgentAudio(audioBase64);
+                    const audio = msg.audio_event?.audio_base_64 || msg.audio;
+                    if (audio) {
+                        updateUI('speaking');
+                        queueAudio(audio);
                     }
                     break;
 
                 case 'ping':
                     const eventId = msg.ping_event?.event_id;
-                    if (eventId) {
-                        ws.send(JSON.stringify({ type: 'pong', event_id: eventId }));
-                    }
+                    if (eventId) ws.send(JSON.stringify({ type: 'pong', event_id: eventId }));
                     break;
 
                 case 'interruption':
-                case 'user_interruption':
                 case 'agent_audio_interrupted':
-                    console.log('Interruption event:', msg.type);
-                    stopAudioPlayback();
-                    hideTyping();
-                    updateVoiceUI('listening');
-                    break;
-
-                case 'internal_tentative_agent_response':
-                    if (!document.getElementById('typingIndicator')) {
-                        showTyping();
-                    }
+                    stopAudio();
+                    updateUI('listening');
                     break;
             }
         }
 
-        function stopVoice() {
-            conversationReady = false;
-            if (ws) {
-                ws.close();
-                ws = null;
+        async function showPropertiesAndCaptureLead() {
+            // Extract search criteria from transcript
+            const allUserText = transcript
+                .filter(t => t.role === 'user')
+                .map(t => t.text)
+                .join(' ')
+                .toLowerCase();
+
+            // Extract location
+            let location = null;
+            const locationMap = {
+                'bangalore': 'Bangalore',
+                'bengaluru': 'Bangalore',
+                'banglore': 'Bangalore',
+                'thane': 'Thane',
+                'mumbai': 'Mumbai',
+                'whitefield': 'Whitefield',
+                'electronic city': 'Electronic City'
+            };
+            for (const [key, val] of Object.entries(locationMap)) {
+                if (allUserText.includes(key)) {
+                    location = val;
+                    break;
+                }
             }
-            stopListening();
-            stopAudioPlayback();
-            isVoiceActive = false;
-            updateVoiceUI('inactive');
-            document.getElementById('connectionStatus').textContent = 'Click mic to start';
 
-            // Send transcript for lead capture if we have any conversation
-            if (conversationTranscript.length > 0) {
-                captureVoiceLead();
-            }
-        }
+            // Extract BHK
+            let bhk = null;
+            const bhkMatch = allUserText.match(/(\d)\s*bhk/);
+            if (bhkMatch) bhk = bhkMatch[1] + ' BHK';
 
-        async function captureVoiceLead() {
-            if (conversationTranscript.length === 0) return;
+            // Extract budget
+            let budget = null;
+            const crMatch = allUserText.match(/(\d+\.?\d*)\s*(?:crore|cr)/);
+            const lakhMatch = allUserText.match(/(\d+\.?\d*)\s*(?:lakh|lac)/);
+            if (crMatch) budget = crMatch[1] + ' crore';
+            else if (lakhMatch) budget = lakhMatch[1] + ' lakh';
 
+            console.log('🔍 Search criteria:', { location, bhk, budget });
+
+            // Fetch properties from API
             try {
-                console.log('📞 Capturing voice lead from', conversationTranscript.length, 'messages');
-                const response = await fetch('/api/voice/capture-lead', {
+                const params = new URLSearchParams();
+                if (location) params.append('location', location);
+                if (bhk) params.append('bhk', bhk);
+                if (budget) params.append('budget', budget);
+
+                const res = await fetch(`/api/properties/search?${params}`);
+                const data = await res.json();
+
+                console.log('🏠 Properties found:', data);
+
+                if (data.properties && data.properties.length > 0) {
+                    showPropertyCards(data.properties, data.is_fallback, location);
+                }
+
+            } catch (e) {
+                console.error('Property fetch error:', e);
+            }
+
+            // Capture lead
+            try {
+                const res = await fetch('/api/voice/capture-lead', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        session_id: sessionId,
-                        transcript: conversationTranscript
-                    })
+                    body: JSON.stringify({ session_id: sessionId, transcript })
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('📞 Lead capture result:', data);
-                    if (data.success) {
-                        console.log('✅ Lead saved to Salesforce!');
-                    } else {
-                        console.log('⚠️ Could not save lead:', data.message);
-                        console.log('📞 Captured fields:', data.captured_fields);
-                        console.log('📞 Missing fields:', data.missing_fields);
-                    }
-                }
+                const data = await res.json();
+                console.log('Lead capture:', data);
             } catch (e) {
-                console.error('Error capturing voice lead:', e);
-            }
-
-            // Reset for next conversation
-            conversationTranscript = [];
-            sessionId = 'voice_' + Date.now();
-        }
-
-        async function startListening() {
-            if (isListening) return;
-
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true }
-                });
-
-                audioContext = new AudioContext({ sampleRate: 16000 });
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 512;
-
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-
-                processor = audioContext.createScriptProcessor(2048, 1, 1);
-                processor.onaudioprocess = (e) => {
-                    if (!isListening || !ws || ws.readyState !== WebSocket.OPEN || !conversationReady) return;
-
-                    const inputData = e.inputBuffer.getChannelData(0);
-                    const pcm16 = new Int16Array(inputData.length);
-                    for (let i = 0; i < inputData.length; i++) {
-                        const s = Math.max(-1, Math.min(1, inputData[i]));
-                        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-                    }
-
-                    const base64 = arrayBufferToBase64(pcm16.buffer);
-                    ws.send(JSON.stringify({ user_audio_chunk: base64 }));
-                };
-
-                microphone.connect(processor);
-                processor.connect(audioContext.destination);
-
-                isListening = true;
-                updateVoiceUI('listening');
-                monitorAudio();
-
-            } catch (err) {
-                console.error('Mic error:', err);
-                updateVoiceUI('inactive');
+                console.error('Lead capture error:', e);
             }
         }
 
-        function monitorAudio() {
-            if (!isListening || !analyser) return;
+        function showPropertyCards(properties, isFallback, searchLocation) {
+            const container = document.createElement('div');
+            container.className = 'property-cards';
 
-            const data = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(data);
+            // Show fallback notice if needed
+            if (isFallback) {
+                const notice = document.createElement('div');
+                notice.className = 'fallback-notice';
+                notice.innerHTML = `✨ Here are some excellent Raymond Realty projects you might like!`;
+                container.appendChild(notice);
+            } else if (searchLocation) {
+                const notice = document.createElement('div');
+                notice.className = 'fallback-notice';
+                notice.style.background = 'rgba(16,185,129,0.15)';
+                notice.style.borderColor = 'rgba(16,185,129,0.3)';
+                notice.style.color = '#34d399';
+                notice.innerHTML = `🏠 Found ${properties.length} properties in ${searchLocation}`;
+                container.appendChild(notice);
+            }
 
-            const level = data.reduce((a, b) => a + b, 0) / data.length / 255;
-
-            const bars = audioVisualizer.querySelectorAll('.audio-bar');
-            bars.forEach((bar) => {
-                const h = Math.max(4, level * 200 * (1 + Math.random() * 0.5));
-                bar.style.height = h + 'px';
+            // Add property cards
+            properties.forEach(p => {
+                const price = formatPrice(p.price);
+                const card = document.createElement('div');
+                card.className = 'property-card';
+                card.innerHTML = `
+                    <h4>${escapeHtml(p.name)}</h4>
+                    <div class="price">₹ ${price}</div>
+                    <div class="details">
+                        <strong>${escapeHtml(p.bhk)}</strong> ${escapeHtml(p.type || 'Apartment')} in ${escapeHtml(p.location)}<br>
+                        ${p.area_sqft ? `📐 ${p.area_sqft} sq.ft` : ''}
+                        ${p.possession ? ` • 🏠 ${escapeHtml(p.possession)}` : ''}
+                        ${p.builder ? `<br>🏗️ ${escapeHtml(p.builder)}` : ''}
+                    </div>
+                    <div class="links">
+                        ${p.property_url ? `<a href="${p.property_url}" target="_blank">📋 Details</a>` : ''}
+                        ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">🎥 Tour</a>` : ''}
+                        ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
             });
 
-            if (isListening) requestAnimationFrame(monitorAudio);
-        }
-
-        function stopListening() {
-            isListening = false;
-            if (processor) { processor.disconnect(); processor = null; }
-            if (microphone) { microphone.disconnect(); microphone = null; }
-            if (audioContext && audioContext.state !== 'closed') {
-                audioContext.close();
-                audioContext = null;
-            }
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-                stream = null;
-            }
-        }
-
-        // Audio playback
-        let playbackAudioContext = null;
-        let audioPlaybackQueue = [];
-        let isPlayingAgentAudio = false;
-        let currentAudioSource = null;
-
-        function queueAgentAudio(base64Audio) {
-            const arrayBuffer = base64ToArrayBuffer(base64Audio);
-            audioPlaybackQueue.push(arrayBuffer);
-            if (!isPlayingAgentAudio) {
-                playNextAgentAudio();
-            }
-        }
-
-        async function playNextAgentAudio() {
-            if (audioPlaybackQueue.length === 0) {
-                isPlayingAgentAudio = false;
-                isSpeaking = false;
-                currentAudioSource = null;
-                if (isVoiceActive && conversationReady) {
-                    updateVoiceUI('listening');
-                }
-                return;
-            }
-
-            isPlayingAgentAudio = true;
-            isSpeaking = true;
-            updateVoiceUI('speaking');
-
-            const arrayBuffer = audioPlaybackQueue.shift();
-
-            try {
-                if (!playbackAudioContext || playbackAudioContext.state === 'closed') {
-                    playbackAudioContext = new AudioContext();
-                }
-
-                if (playbackAudioContext.state === 'suspended') {
-                    await playbackAudioContext.resume();
-                }
-
-                try {
-                    const audioBuffer = await playbackAudioContext.decodeAudioData(arrayBuffer.slice(0));
-                    const source = playbackAudioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.connect(playbackAudioContext.destination);
-                    currentAudioSource = source;
-
-                    source.onended = () => {
-                        currentAudioSource = null;
-                        playNextAgentAudio();
-                    };
-                    source.start();
-                } catch (decodeErr) {
-                    const pcmData = new Int16Array(arrayBuffer);
-                    const floatData = new Float32Array(pcmData.length);
-                    for (let i = 0; i < pcmData.length; i++) {
-                        floatData[i] = pcmData[i] / 32768.0;
-                    }
-
-                    const audioBuffer = playbackAudioContext.createBuffer(1, floatData.length, 16000);
-                    audioBuffer.getChannelData(0).set(floatData);
-
-                    const source = playbackAudioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.connect(playbackAudioContext.destination);
-                    currentAudioSource = source;
-
-                    source.onended = () => {
-                        currentAudioSource = null;
-                        playNextAgentAudio();
-                    };
-                    source.start();
-                }
-
-            } catch (e) {
-                console.error('Audio playback error:', e);
-                playNextAgentAudio();
-            }
-        }
-
-        function stopAudioPlayback() {
-            audioPlaybackQueue = [];
-            isPlayingAgentAudio = false;
-            isSpeaking = false;
-            if (currentAudioSource) {
-                try { currentAudioSource.stop(); } catch (e) {}
-                currentAudioSource = null;
-            }
-        }
-
-        // Real-time property cards
-        let prefetchedProperties = null;
-
-        async function prefetchPropertiesIfNeeded(userText) {
-            const propertyQueries = ['show', 'property', 'properties', 'bhk', 'apartment', 'flat', 'looking for', 'find', 'search', 'available', 'bangalore', 'thane', 'mumbai', 'pune', 'whitefield', 'options', 'budget', 'crore', 'lakh', 'home', 'house', '1bhk', '2bhk', '3bhk', '4bhk', 'villa'];
-            const text = userText.toLowerCase();
-
-            const isPropertyQuery = propertyQueries.some(q => text.includes(q));
-            if (!isPropertyQuery) {
-                prefetchedProperties = null;
-                return;
-            }
-
-            try {
-                const searchQuery = extractSearchQuery(userText);
-                console.log('🔍 Prefetching properties for:', searchQuery);
-                const params = new URLSearchParams({ q: searchQuery });
-                const response = await fetch(`/api/properties/search?${params}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    // Store full response including fallback info
-                    prefetchedProperties = data;
-                    console.log('🔍 Prefetched', data.properties?.length || 0, 'properties, is_fallback:', data.is_fallback);
-                }
-            } catch (e) {
-                console.error('Prefetch error:', e);
-            }
-        }
-
-        async function checkAndShowPropertyCards(agentText) {
-            if (!hasUserInteracted) return;
-
-            const propertyKeywords = ['property', 'properties', 'bhk', 'apartment', 'flat', 'home', 'house', 'bedroom', 'villa', 'residential', 'real estate', 'sq ft', 'sqft', 'crore', 'lakh', 'price', 'budget', 'available', 'options', 'recommend', 'here are', 'found', 'showing', 'check out', 'bangalore', 'thane', 'whitefield', 'great', 'perfect', 'excellent', 'wonderful'];
-
-            const text = agentText.toLowerCase();
-            const mentionsProperty = propertyKeywords.some(keyword => text.includes(keyword));
-
-            // If we have prefetched data, show it
-            if (prefetchedProperties && prefetchedProperties.properties && prefetchedProperties.properties.length > 0) {
-                console.log('📦 Showing prefetched properties:', prefetchedProperties.properties.length, 'is_fallback:', prefetchedProperties.is_fallback);
-                if (prefetchedProperties.is_fallback && prefetchedProperties.fallback_message) {
-                    showFallbackMessage(prefetchedProperties.fallback_message);
-                }
-                appendPropertyCards(prefetchedProperties.properties);
-                prefetchedProperties = null;
-                return;
-            }
-
-            if (!mentionsProperty) return;
-
-            // Try to fetch properties based on agent response
-            try {
-                const searchQuery = extractSearchQuery(agentText);
-                console.log('🔍 Fetching properties from agent text:', searchQuery);
-                const params = new URLSearchParams({ q: searchQuery });
-                const response = await fetch(`/api/properties/search?${params}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.properties && data.properties.length > 0) {
-                        console.log('📦 Found', data.properties.length, 'properties, is_fallback:', data.is_fallback);
-                        if (data.is_fallback && data.fallback_message) {
-                            showFallbackMessage(data.fallback_message);
-                        }
-                        appendPropertyCards(data.properties);
-                    }
-                }
-            } catch (e) {
-                console.error('Property search error:', e);
-            }
-
-            prefetchedProperties = null;
-        }
-
-        function showFallbackMessage(message) {
-            const msg = document.createElement('div');
-            msg.className = 'message assistant';
-            msg.innerHTML = `
-                <div class="message-avatar">🏠</div>
-                <div class="message-content">
-                    <div class="message-bubble" style="background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.1)); border: 1px solid rgba(245,158,11,0.3);">
-                        <span style="color: var(--warning);">ℹ️</span> ${escapeHtml(message)}
-                    </div>
-                </div>
-            `;
-            messagesContainer.appendChild(msg);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function extractSearchQuery(text) {
-            const parts = [];
-            const bhkMatch = text.match(/(\d)\s*bhk/i);
-            if (bhkMatch) parts.push(`${bhkMatch[1]} bhk`);
-
-            const textLower = text.toLowerCase();
-
-            // Handle typos and aliases
-            const locationAliases = {
-                'banglore': 'bangalore',
-                'bengaluru': 'bangalore',
-                'blr': 'bangalore',
-                'bombay': 'mumbai',
-                'thaney': 'thane',
-                'poona': 'pune'
-            };
-
-            let foundLocation = null;
-
-            // Check for typos/aliases first
-            for (const [typo, correct] of Object.entries(locationAliases)) {
-                if (textLower.includes(typo)) {
-                    foundLocation = correct;
-                    break;
-                }
-            }
-
-            // Check standard locations if no alias found
-            if (!foundLocation) {
-                const locations = ['thane', 'mumbai', 'bangalore', 'pune', 'navi mumbai', 'whitefield', 'electronic city'];
-                for (const loc of locations) {
-                    if (textLower.includes(loc)) {
-                        foundLocation = loc;
-                        break;
-                    }
-                }
-            }
-
-            if (foundLocation) parts.push(foundLocation);
-
-            const crMatch = text.match(/(\d+\.?\d*)\s*(?:crore|cr)/i);
-            const lakhMatch = text.match(/(\d+\.?\d*)\s*(?:lakh|lac)/i);
-            if (crMatch) parts.push(`${crMatch[1]} crore`);
-            else if (lakhMatch) parts.push(`${lakhMatch[1]} lakh`);
-
-            return parts.length > 0 ? parts.join(' ') : text.substring(0, 100);
+            messagesEl.appendChild(container);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
         }
 
         function formatPrice(price) {
-            if (typeof price === 'string') return price;
-            if (typeof price !== 'number') return 'Price on request';
-            if (price >= 10000000) return (price / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
-            if (price >= 100000) return (price / 100000).toFixed(2).replace(/\.?0+$/, '') + ' Lakh';
-            return price.toLocaleString('en-IN');
-        }
-
-        function appendPropertyCards(properties) {
-            const messages = messagesContainer.querySelectorAll('.message.assistant');
-            if (messages.length === 0) return;
-
-            const lastMessage = messages[messages.length - 1];
-            const content = lastMessage.querySelector('.message-content');
-            if (!content || content.querySelector('.property-cards')) return;
-
-            let cardsHtml = '<div class="property-cards" style="animation: slideIn 0.3s ease-out;">';
-            for (const p of properties) {
-                const formattedPrice = formatPrice(p.price);
-                const pricePerSqft = p.price_per_sqft || (p.area_sqft && p.price ? Math.round(p.price / p.area_sqft) : null);
-
-                cardsHtml += `
-                    <div class="property-card">
-                        <h4>${escapeHtml(p.name)}</h4>
-                        <div class="price">₹ ${escapeHtml(formattedPrice)}</div>
-                        <div class="details">
-                            <strong>${escapeHtml(p.bhk || '')}</strong> ${escapeHtml(p.type || 'Apartment')} in ${escapeHtml(p.location || '')}
-                            <br>
-                            ${p.area_sqft ? `📐 ${escapeHtml(String(p.area_sqft))} sq.ft` : ''}
-                            ${pricePerSqft ? ` • ₹${pricePerSqft.toLocaleString()}/sqft` : ''}
-                            <br>
-                            ${p.possession ? `🏠 ${escapeHtml(p.possession)}` : ''}
-                            ${p.builder ? ` • 🏗️ ${escapeHtml(p.builder)}` : ''}
-                        </div>
-                        ${p.nearby_metro || p.nearby_mall ? `
-                        <div class="nearby" style="font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0; line-height: 1.4;">
-                            ${p.nearby_metro ? `🚇 ${escapeHtml(p.nearby_metro)}<br>` : ''}
-                            ${p.nearby_mall ? `🛒 ${escapeHtml(p.nearby_mall)}` : ''}
-                        </div>
-                        ` : ''}
-                        <div class="amenities">${p.amenities ? escapeHtml(p.amenities.slice(0, 4).join(' • ')) : ''}</div>
-                        <div class="property-links">
-                            ${p.property_url ? `<a href="${p.property_url}" target="_blank">📋 Details</a>` : ''}
-                            ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">🎥 Tour</a>` : ''}
-                            ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">📄 Brochure</a>` : ''}
-                            ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
-                        </div>
-                    </div>
-                `;
+            if (!price) return 'On Request';
+            if (price >= 10000000) {
+                return (price / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
             }
-            cardsHtml += '</div>';
-
-            content.insertAdjacentHTML('beforeend', cardsHtml);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function addMessage(role, text) {
-            const welcome = messagesContainer.querySelector('.welcome-message');
-            if (welcome) welcome.remove();
-
-            const msg = document.createElement('div');
-            msg.className = 'message ' + role;
-
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            msg.innerHTML = `
-                <div class="message-avatar">${role === 'user' ? '👤' : '🏠'}</div>
-                <div class="message-content">
-                    <div class="message-bubble">${escapeHtml(text)}</div>
-                    <div class="message-time">${time}</div>
-                </div>
-            `;
-            messagesContainer.appendChild(msg);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return (price / 100000).toFixed(0) + ' Lakh';
         }
 
         function escapeHtml(text) {
@@ -1117,71 +439,157 @@
             return div.innerHTML;
         }
 
+        function endConversation() {
+            isActive = false;
+            updateUI('inactive');
+            statusEl.textContent = 'Click mic to start';
+
+            // Show properties if not already shown
+            if (transcript.length > 0 && !propertiesShown) {
+                propertiesShown = true;
+                showPropertiesAndCaptureLead();
+            }
+
+            // Cleanup
+            stopMicrophone();
+            stopAudio();
+            if (ws) { ws.close(); ws = null; }
+
+            // Reset for next conversation
+            transcript = [];
+            sessionId = 'session_' + Date.now();
+        }
+
+        async function startMicrophone() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true }
+                });
+
+                audioContext = new AudioContext({ sampleRate: 16000 });
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+
+                processor = audioContext.createScriptProcessor(2048, 1, 1);
+                processor.onaudioprocess = (e) => {
+                    if (!isActive || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+                    const input = e.inputBuffer.getChannelData(0);
+                    const pcm16 = new Int16Array(input.length);
+                    for (let i = 0; i < input.length; i++) {
+                        const s = Math.max(-1, Math.min(1, input[i]));
+                        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    }
+                    ws.send(JSON.stringify({ user_audio_chunk: btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer))) }));
+                };
+
+                microphone.connect(processor);
+                processor.connect(audioContext.destination);
+                updateUI('listening');
+
+            } catch (e) {
+                console.error('Mic error:', e);
+                statusEl.textContent = 'Mic access denied';
+            }
+        }
+
+        function stopMicrophone() {
+            if (processor) { processor.disconnect(); processor = null; }
+            if (microphone) { microphone.disconnect(); microphone = null; }
+            if (audioContext) { audioContext.close(); audioContext = null; }
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+        }
+
+        function queueAudio(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            audioQueue.push(bytes.buffer);
+            if (!isPlaying) playNext();
+        }
+
+        async function playNext() {
+            if (audioQueue.length === 0) {
+                isPlaying = false;
+                if (isActive) updateUI('listening');
+                return;
+            }
+
+            isPlaying = true;
+            const buffer = audioQueue.shift();
+
+            try {
+                if (!playbackCtx) playbackCtx = new AudioContext();
+                if (playbackCtx.state === 'suspended') await playbackCtx.resume();
+
+                const audioBuffer = await playbackCtx.decodeAudioData(buffer.slice(0));
+                currentSource = playbackCtx.createBufferSource();
+                currentSource.buffer = audioBuffer;
+                currentSource.connect(playbackCtx.destination);
+                currentSource.onended = playNext;
+                currentSource.start();
+            } catch (e) {
+                try {
+                    const pcm = new Int16Array(buffer);
+                    const float = new Float32Array(pcm.length);
+                    for (let i = 0; i < pcm.length; i++) float[i] = pcm[i] / 32768;
+
+                    if (!playbackCtx) playbackCtx = new AudioContext();
+                    const audioBuffer = playbackCtx.createBuffer(1, float.length, 16000);
+                    audioBuffer.getChannelData(0).set(float);
+
+                    currentSource = playbackCtx.createBufferSource();
+                    currentSource.buffer = audioBuffer;
+                    currentSource.connect(playbackCtx.destination);
+                    currentSource.onended = playNext;
+                    currentSource.start();
+                } catch (e2) {
+                    console.error('Audio error:', e2);
+                    playNext();
+                }
+            }
+        }
+
+        function stopAudio() {
+            audioQueue = [];
+            isPlaying = false;
+            if (currentSource) { try { currentSource.stop(); } catch(e){} currentSource = null; }
+        }
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = 'message ' + role;
+            div.textContent = text;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
         function showTyping() {
-            const typing = document.createElement('div');
-            typing.className = 'message assistant';
-            typing.id = 'typingIndicator';
-            typing.innerHTML = `
-                <div class="message-avatar">🏠</div>
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <span></span><span></span><span></span>
-                    </div>
-                </div>
-            `;
-            messagesContainer.appendChild(typing);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (document.getElementById('typing')) return;
+            const div = document.createElement('div');
+            div.id = 'typing';
+            div.className = 'typing';
+            div.innerHTML = '<span></span><span></span><span></span>';
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
         }
 
         function hideTyping() {
-            const typing = document.getElementById('typingIndicator');
-            if (typing) typing.remove();
+            const t = document.getElementById('typing');
+            if (t) t.remove();
         }
 
-        function arrayBufferToBase64(buffer) {
-            const bytes = new Uint8Array(buffer);
-            let binary = '';
-            for (let i = 0; i < bytes.length; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return btoa(binary);
-        }
-
-        function base64ToArrayBuffer(base64) {
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function updateVoiceUI(state) {
-            voiceBtn.className = 'btn-voice ' + state;
+        function updateUI(state) {
+            voiceBtn.className = 'btn-voice' + (state === 'listening' || state === 'speaking' ? ' active' : '');
             voiceStatus.className = 'voice-status ' + state;
 
-            const statusTexts = {
-                inactive: 'Click mic to start',
-                listening: 'Listening... Speak now',
-                processing: 'Processing...',
-                speaking: 'Speaking... (click to interrupt)'
-            };
-            voiceStatusText.textContent = statusTexts[state] || '';
-
-            const icons = {
-                inactive: '🎤',
-                listening: '🔴',
-                processing: '⏳',
-                speaking: '⏹️'
-            };
-            voiceBtn.textContent = icons[state] || '🎤';
-            voiceBtn.title = state === 'speaking' ? 'Click to interrupt' : state === 'inactive' ? 'Start voice' : 'Stop voice';
+            const texts = { inactive: 'Ready', listening: 'Listening...', speaking: 'Speaking...' };
+            voiceStatus.textContent = texts[state] || 'Ready';
+            voiceBtn.textContent = isActive ? '⏹️' : '🎤';
         }
 
-        window.onbeforeunload = () => {
-            if (ws) ws.close();
-            stopListening();
-        };
+        window.onbeforeunload = endConversation;
     </script>
 </body>
 </html>

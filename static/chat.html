@@ -613,13 +613,42 @@
                 });
 
                 const data = await response.json();
+                console.log('API Response:', data);
                 hideTyping();
+
+                // Check if response has properties
+                if (data.properties && data.properties.length > 0) {
+                    console.log('Properties found:', data.properties.length);
+                }
+
                 addMessage('assistant', data.text, data.properties, data.is_fallback);
+
+                // Show conversation ended notice if applicable
+                if (data.conversation_ended) {
+                    console.log('Conversation ended - lead should be saved');
+                    showConversationEndedNotice();
+                }
             } catch (error) {
                 hideTyping();
                 addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
                 console.error('Chat error:', error);
             }
+        }
+
+        function showConversationEndedNotice() {
+            const notice = document.createElement('div');
+            notice.className = 'message assistant';
+            notice.innerHTML = `
+                <div class="message-avatar">✅</div>
+                <div class="message-content">
+                    <div class="message-bubble" style="background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1)); border: 1px solid rgba(16,185,129,0.3);">
+                        <strong>Thank you for chatting!</strong><br>
+                        Our property expert will contact you soon.
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(notice);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     </script>
 </body>

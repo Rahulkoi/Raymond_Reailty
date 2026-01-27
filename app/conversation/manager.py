@@ -1,325 +1,321 @@
-print("🔥 LOADING ConversationManager")
+print("ConversationManager v5.0 - Intelligent human-like chat")
 
 import json
 import re
+from difflib import get_close_matches
 from app.llm.openai_client import OpenAIClient
 from app.rag.retriever import retrieve_properties
 from app.response.response_builder import format_property_cards
 
-MAX_HISTORY_TURNS = 4
+# Known cities for fuzzy matching
+KNOWN_CITIES = ["Bangalore", "Mumbai", "Thane", "Whitefield", "Electronic City",
+                "Sarjapur", "Yelahanka", "Hebbal", "Bandra", "Andheri", "Powai"]
 
-# Location mappings
-KNOWN_LOCATIONS = {
-    "bangalore": "Bangalore", "bengaluru": "Bangalore", "banglore": "Bangalore",
-    "bangalor": "Bangalore", "bengalor": "Bangalore", "blr": "Bangalore",
-    "thane": "Thane", "thana": "Thane",
-    "mumbai": "Mumbai", "bombay": "Mumbai",
-    "whitefield": "Whitefield", "electronic city": "Electronic City",
-    "sarjapur": "Sarjapur Road", "yelahanka": "Yelahanka",
-    "devanahalli": "Devanahalli", "koramangala": "Koramangala",
-    "indiranagar": "Indiranagar", "hebbal": "Hebbal",
-}
+SYSTEM_PROMPT = """You are Priya, a friendly real estate assistant for Raymond Realty.
+
+RULES:
+1. Keep responses SHORT (1-2 sentences max)
+2. Be warm and conversational like a real person
+3. Collect: name, phone, email - naturally in conversation
+4. Remember context throughout the conversation
+
+CURRENT STATUS:
+{status}
+
+CONVERSATION SO FAR:
+{context}
+
+RESPOND NATURALLY based on what's missing or what user is asking."""
 
 
 class ConversationManager:
+    """Intelligent human-like conversation manager."""
+
     def __init__(self):
+        print("New ConversationManager session started")
         self.llm = OpenAIClient()
-        self.lead_data = {}
-        self.lead_created = False
+        self.lead = {}
+        self.lead_saved = False
         self.history = []
-        self.turn_count = 0
+        self.pending_validation = None  # Track if we're waiting for correction
 
-    def handle_user_input(self, user_text: str):
-        """Main entry point."""
-        self.turn_count += 1
-        print(f"\n{'='*50}")
-        print(f"📥 Turn {self.turn_count}: {user_text}")
+    def handle_user_input(self, user_text: str) -> dict:
+        """Process user message intelligently."""
+        print(f"\n{'='*60}")
+        print(f"User: '{user_text}'")
 
-        # Extract entities FIRST
-        self._extract_entities_from_text(user_text)
-        print(f"📋 Lead data after extraction: {self.lead_data}")
+        # Step 1: Smart extraction with validation
+        validation_issue = self._smart_extract(user_text)
+        print(f"Lead data: {self.lead}")
 
-        user_lower = user_text.lower().strip()
-
-        # Check for end conversation
-        if self._is_ending(user_lower):
-            print("🔚 User ending conversation")
-            return self._end_conversation()
-
-        # Generate response based on context
-        response_text = self._generate_response(user_text, user_lower)
-
-        # ALWAYS ask for missing info after first turn
-        final_text = self._append_lead_question(response_text)
-
-        print(f"📤 Final response: {final_text}")
-
-        # Save to history
+        # Step 2: Add to history
         self.history.append({"role": "user", "content": user_text})
-        self.history.append({"role": "assistant", "content": final_text})
-        if len(self.history) > MAX_HISTORY_TURNS * 2:
-            self.history = self.history[-MAX_HISTORY_TURNS * 2:]
 
-        # Auto-save lead
-        self._auto_save_lead()
+        # Step 3: If there's a validation issue, ask for correction
+        if validation_issue:
+            print(f"Validation issue: {validation_issue}")
+            self.history.append({"role": "assistant", "content": validation_issue})
+            return {"text": validation_issue}
 
-        return {"text": final_text}
+        # Step 4: Check if user wants to end
+        if self._wants_to_end(user_text):
+            return self._farewell_with_properties()
 
-    def _generate_response(self, user_text: str, user_lower: str) -> str:
-        """Generate appropriate response based on user input."""
+        # Step 5: Check if all info collected AND user wants properties
+        if self._has_all_info():
+            if self._wants_properties_now(user_text):
+                return self._farewell_with_properties()
+            # All info collected - offer to show properties
+            response = self._generate_response(user_text)
+            # Auto-show properties if we have everything
+            if "show" in response.lower() or "here" in response.lower():
+                return self._farewell_with_properties()
 
-        # If user is asking about properties
-        if self._is_property_query(user_lower):
-            return self._property_response()
+        # Step 6: Generate intelligent response
+        response = self._generate_response(user_text)
+        print(f"Bot: {response}")
 
-        # If user is providing info (name, phone, email)
-        if self._is_providing_info(user_text):
-            return self._info_acknowledgment()
+        self.history.append({"role": "assistant", "content": response})
+        self._try_save_lead()
 
-        # General conversation - use minimal LLM
-        return self._llm_response(user_text)
+        return {"text": response}
 
-    def _is_ending(self, text: str) -> bool:
-        end_words = ["bye", "goodbye", "thanks", "thank you", "that's all",
-                     "thats all", "done", "end", "see you", "later"]
-        return any(word in text for word in end_words)
+    def _smart_extract(self, text: str) -> str:
+        """Smart extraction with validation. Returns error message if validation fails."""
+        t = text.lower().strip()
 
-    def _is_property_query(self, text: str) -> bool:
-        words = ["property", "properties", "flat", "flats", "apartment",
-                 "house", "home", "show me", "looking for", "interested",
-                 "available", "options", "listing"]
-        return any(word in text for word in words)
+        # --- CITY DETECTION (Fuzzy matching) ---
+        detected_city = self._detect_city(t)
+        if detected_city:
+            self.lead["city"] = detected_city
+            print(f"  City detected: {detected_city}")
 
-    def _is_providing_info(self, text: str) -> bool:
-        # Phone number
-        if re.search(r'\b[6-9]\d{9}\b', text):
-            return True
-        # Email
-        if re.search(r'@.*\.', text):
-            return True
-        # Name patterns
-        if re.search(r"(?:i am|i'm|my name is|call me|this is)\s+\w+", text.lower()):
-            return True
-        return False
-
-    def _property_response(self) -> str:
-        """Generate response for property query using REAL data."""
-        location = self.lead_data.get("city")
-        budget = self._parse_budget(self.lead_data.get("budget"))
-        bhk = self.lead_data.get("configuration")
-
-        properties = retrieve_properties(location=location, max_price=budget, bhk=bhk)
-        print(f"🏠 Search: loc={location}, budget={budget}, bhk={bhk} → {len(properties)} found")
-
-        if properties:
-            p = properties[0]
-            price = self._format_price(p['price'])
-            if location:
-                return f"Yes! We have {len(properties)} properties in {location}. Like {p['name']}, {p.get('bhk','')} at {price}."
+        # --- PHONE DETECTION with validation ---
+        # Look for any sequence of digits
+        digits = re.sub(r'\D', '', text)
+        if len(digits) >= 8:  # Looks like a phone attempt
+            if len(digits) == 10 and digits[0] in '6789':
+                self.lead["phone"] = digits
+                print(f"  Phone: {digits}")
             else:
-                return f"We have {len(properties)} great options! Like {p['name']}, {p.get('bhk','')} at {price}."
-        else:
-            return "We have excellent properties available. Which area interests you?"
+                # Invalid phone - ask for correction
+                if len(digits) < 10:
+                    return f"That phone number seems incomplete ({len(digits)} digits). Could you please share your 10-digit mobile number?"
+                elif len(digits) > 10:
+                    return f"That seems like too many digits. Could you please share just your 10-digit mobile number?"
+                elif digits[0] not in '6789':
+                    return "Indian mobile numbers start with 6, 7, 8, or 9. Could you please check your number?"
 
-    def _info_acknowledgment(self) -> str:
-        """Acknowledge info provided by user."""
-        name = self.lead_data.get("fullName")
-        phone = self.lead_data.get("mobileNumber")
-        email = self.lead_data.get("emailAddress")
+        # --- EMAIL DETECTION with validation ---
+        # Look for anything with @ symbol
+        if '@' in text:
+            email_match = re.search(r'[\w.+-]+@[\w-]+\.[\w.-]+', text)
+            if email_match:
+                email = email_match.group().lower()
+                # Basic validation
+                if email.endswith('.cm'):
+                    return f"Did you mean {email[:-3]}.com? Please confirm your email."
+                elif not re.search(r'\.(com|in|org|net|co|io|gmail|yahoo|hotmail)$', email, re.I):
+                    return f"'{email}' doesn't look like a valid email. Could you please check it?"
+                else:
+                    self.lead["email"] = email
+                    print(f"  Email: {email}")
+            else:
+                return "That email doesn't look quite right. Could you please share it again?"
 
-        if name and phone and email:
-            return f"Perfect {name}! Got all your details."
-        elif name and phone:
-            return f"Thanks {name}! Got your number."
-        elif name:
-            return f"Hi {name}! Nice to meet you."
-        elif phone:
-            return "Got your number!"
-        elif email:
-            return "Got your email!"
-        else:
-            return "Thanks!"
-
-    def _llm_response(self, user_text: str) -> str:
-        """Get minimal LLM response."""
-        try:
-            raw = self.llm.generate(
-                system_prompt=self._minimal_prompt(),
-                user_text=user_text,
-                history=self.history[-4:]
-            )
-            data = self._safe_json(raw)
-            self._extract_llm_entities(data.get("arguments", {}))
-            return data.get("response", "How can I help you?")
-        except Exception as e:
-            print(f"❌ LLM error: {e}")
-            return "How can I help you with properties today?"
-
-    def _append_lead_question(self, response_text: str) -> str:
-        """ALWAYS append question for missing lead info."""
-        name = self.lead_data.get("fullName")
-        phone = self.lead_data.get("mobileNumber")
-        email = self.lead_data.get("emailAddress")
-
-        print(f"🔍 Checking lead: name={name}, phone={phone}, email={email}")
-
-        # After first turn, always ask for missing critical info
-        if self.turn_count >= 1:
-            if not name:
-                print("➕ Adding name question")
-                return response_text + " What's your name?"
-            elif not phone:
-                print("➕ Adding phone question")
-                first_name = name.split()[0] if name else ""
-                return response_text + f" {first_name}, what's your phone number?"
-            elif not email:
-                print("➕ Adding email question")
-                return response_text + " And your email address?"
-
-        return response_text
-
-    def _end_conversation(self):
-        """End conversation and show property cards."""
-        self._auto_save_lead()
-
-        location = self.lead_data.get("city")
-        budget = self._parse_budget(self.lead_data.get("budget"))
-        bhk = self.lead_data.get("configuration")
-
-        properties = retrieve_properties(location=location, max_price=budget, bhk=bhk)
-        name = self.lead_data.get("fullName", "").split()[0] if self.lead_data.get("fullName") else ""
-
-        if properties:
-            cards = format_property_cards(properties, location, budget, bhk)
-            text = f"Thanks{' ' + name if name else ''}! Here are {len(cards)} properties. We'll call you soon!"
-            print(f"📤 Ending with {len(cards)} property cards")
-            return {"text": text, "properties": cards, "conversation_ended": True}
-        else:
-            all_props = retrieve_properties()
-            if all_props:
-                cards = format_property_cards(all_props[:5])
-                text = f"Thanks{' ' + name if name else ''}! Here are some properties. We'll call soon!"
-                return {"text": text, "properties": cards, "conversation_ended": True}
-
-        return {"text": f"Thanks{' ' + name if name else ''}! We'll call you soon!", "conversation_ended": True}
-
-    # ========== ENTITY EXTRACTION ========== #
-
-    def _extract_entities_from_text(self, text: str):
-        """Extract all entities from user text."""
-        text_lower = text.lower()
-
-        # Location
-        if not self.lead_data.get("city"):
-            for key, loc in KNOWN_LOCATIONS.items():
-                if key in text_lower:
-                    self.lead_data["city"] = loc
-                    print(f"📍 Extracted location: {loc}")
-                    break
-
-        # Phone (Indian 10-digit)
-        if not self.lead_data.get("mobileNumber"):
-            m = re.search(r'\b[6-9]\d{9}\b', text)
-            if m:
-                self.lead_data["mobileNumber"] = m.group()
-                print(f"📞 Extracted phone: {m.group()}")
-
-        # Email
-        if not self.lead_data.get("emailAddress"):
-            m = re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', text)
-            if m:
-                self.lead_data["emailAddress"] = m.group()
-                print(f"📧 Extracted email: {m.group()}")
-
-        # Name - multiple patterns
-        if not self.lead_data.get("fullName"):
-            patterns = [
-                r"(?:i am|i'm|my name is|this is|call me|it's|its)\s+([A-Za-z]+)",
-                r"^([A-Z][a-z]{2,})$",  # Single capitalized word
+        # --- NAME DETECTION ---
+        if not self.lead.get("name"):
+            # Check for name patterns
+            name_patterns = [
+                r"(?:my name is|i am|i'm|this is|call me|it's|its)\s+([a-zA-Z]+)",
+                r"^([A-Z][a-z]{2,15})$"  # Single capitalized word (2-15 chars)
             ]
-            for pattern in patterns:
-                m = re.search(pattern, text, re.IGNORECASE)
+            excluded = ["looking", "interested", "fine", "good", "ok", "yes", "no",
+                       "bye", "goodbye", "thanks", "thank", "hi", "hello", "hey",
+                       "show", "property", "apartment", "flat", "house", "home",
+                       "schedule", "site", "visit", "want", "need", "please",
+                       "great", "awesome", "sure", "okay", "yeah", "yup", "nope"]
+
+            for p in name_patterns:
+                m = re.search(p, text, re.I)
                 if m:
-                    name = m.group(1).strip().title()
-                    skip = ["looking", "interested", "fine", "good", "ok", "yes", "no", "hi", "hello"]
-                    if name.lower() not in skip and len(name) > 1:
-                        self.lead_data["fullName"] = name
-                        print(f"👤 Extracted name: {name}")
+                    name = m.group(1).title()
+                    if name.lower() not in excluded and 2 <= len(name) <= 20:
+                        self.lead["name"] = name
+                        print(f"  Name: {name}")
                         break
 
-        # BHK
-        if not self.lead_data.get("configuration"):
-            m = re.search(r'([1-4])\s*(?:bhk|bedroom|bed)', text_lower)
-            if m:
-                self.lead_data["configuration"] = f"{m.group(1)} BHK"
-                print(f"🏠 Extracted BHK: {m.group(1)} BHK")
+        # --- BHK DETECTION ---
+        bhk_match = re.search(r'([1-4])\s*(?:bhk|bedroom|bed)', t)
+        if bhk_match:
+            self.lead["bhk"] = f"{bhk_match.group(1)} BHK"
+            print(f"  BHK: {self.lead['bhk']}")
 
-        # Budget
-        if not self.lead_data.get("budget"):
-            m = re.search(r'(\d+(?:\.\d+)?)\s*(cr|crore|lakh|lac)', text_lower)
-            if m:
-                self.lead_data["budget"] = f"{m.group(1)} {m.group(2)}"
-                print(f"💰 Extracted budget: {m.group(1)} {m.group(2)}")
+        # --- BUDGET DETECTION ---
+        budget_match = re.search(r'(\d+(?:\.\d+)?)\s*(cr|crore|lakh|lac|l)\b', t)
+        if budget_match:
+            num = budget_match.group(1)
+            unit = budget_match.group(2)
+            if unit in ['cr', 'crore']:
+                self.lead["budget"] = f"{num} crore"
+            else:
+                self.lead["budget"] = f"{num} lakh"
+            print(f"  Budget: {self.lead['budget']}")
 
-    def _extract_llm_entities(self, args):
-        """Extract entities from LLM response."""
-        if not args:
-            return
-        mapping = {
-            "fullName": ["name"],
-            "emailAddress": ["email"],
-            "mobileNumber": ["phone"],
-            "city": ["city", "location"],
-            "budget": ["budget"],
-            "configuration": ["bhk"]
+        return None  # No validation issues
+
+    def _detect_city(self, text: str) -> str:
+        """Fuzzy match city names from user text."""
+        text = text.lower()
+
+        # Direct mappings (including common variations)
+        direct_map = {
+            "bangalore": "Bangalore", "bengaluru": "Bangalore", "blr": "Bangalore",
+            "mumbai": "Mumbai", "bombay": "Mumbai",
+            "thane": "Thane",
+            "whitefield": "Whitefield",
+            "electronic city": "Electronic City", "ec": "Electronic City",
         }
-        for field, keys in mapping.items():
-            for k in keys:
-                val = args.get(k)
-                if val and val != "null" and not self.lead_data.get(field):
-                    self.lead_data[field] = val
-                    print(f"🔍 LLM extracted {field}: {val}")
 
-    # ========== HELPERS ========== #
+        for key, city in direct_map.items():
+            if key in text:
+                return city
 
-    def _minimal_prompt(self):
-        missing = []
-        if not self.lead_data.get("fullName"): missing.append("name")
-        if not self.lead_data.get("mobileNumber"): missing.append("phone")
-        if not self.lead_data.get("emailAddress"): missing.append("email")
+        # Fuzzy matching for typos
+        words = text.split()
+        for word in words:
+            if len(word) >= 4:  # Only check words with 4+ chars
+                matches = get_close_matches(word, [c.lower() for c in KNOWN_CITIES], n=1, cutoff=0.7)
+                if matches:
+                    # Find the original city name
+                    for city in KNOWN_CITIES:
+                        if city.lower() == matches[0]:
+                            return city
+        return None
 
-        return f"""Real estate agent. Brief reply (under 15 words).
-Extract info shared. Need: {', '.join(missing) if missing else 'all collected'}
-JSON only: {{"arguments":{{"name":null,"phone":null,"email":null}},"response":"reply"}}"""
+    def _wants_to_end(self, text: str) -> bool:
+        """Check if user wants to end conversation."""
+        t = text.lower()
+        endings = ["bye", "goodbye", "that's all", "done", "end", "later", "no thanks", "exit", "quit"]
+        return any(e in t for e in endings)
 
-    def _format_price(self, price):
-        if price >= 10000000:
-            return f"{price/10000000:.1f} Cr"
-        return f"{int(price/100000)} L"
+    def _wants_properties_now(self, text: str) -> bool:
+        """Check if user wants to see properties."""
+        t = text.lower()
+        triggers = ["show", "display", "list", "see", "view", "get", "find", "search", "property", "properties"]
+        return any(trigger in t for trigger in triggers)
 
-    def _parse_budget(self, value):
-        if not value:
+    def _has_all_info(self) -> bool:
+        """Check if we have all required info."""
+        return bool(self.lead.get("name") and self.lead.get("phone") and self.lead.get("email"))
+
+    def _generate_response(self, user_text: str) -> str:
+        """Generate intelligent response using LLM."""
+        # Build status
+        status_parts = []
+        if self.lead.get("name"):
+            status_parts.append(f"Name: {self.lead['name']}")
+        else:
+            status_parts.append("Name: NOT YET COLLECTED - ask for it")
+
+        if self.lead.get("phone"):
+            status_parts.append(f"Phone: {self.lead['phone']}")
+        else:
+            status_parts.append("Phone: NOT YET COLLECTED - ask for it after name")
+
+        if self.lead.get("email"):
+            status_parts.append(f"Email: {self.lead['email']}")
+        else:
+            status_parts.append("Email: NOT YET COLLECTED - ask for it after phone")
+
+        if self.lead.get("city"):
+            status_parts.append(f"City interested: {self.lead['city']}")
+        if self.lead.get("bhk"):
+            status_parts.append(f"BHK preference: {self.lead['bhk']}")
+        if self.lead.get("budget"):
+            status_parts.append(f"Budget: {self.lead['budget']}")
+
+        status = "\n".join(status_parts)
+
+        # Build context
+        context_lines = []
+        for msg in self.history[-8:]:
+            role = "User" if msg["role"] == "user" else "Priya"
+            context_lines.append(f"{role}: {msg['content']}")
+        context = "\n".join(context_lines) if context_lines else "Start of conversation"
+
+        prompt = SYSTEM_PROMPT.format(status=status, context=context)
+
+        try:
+            response = self.llm.generate(prompt, user_text, self.history[-4:])
+            return response.strip()
+        except Exception as e:
+            print(f"LLM error: {e}")
+            return self._fallback_response()
+
+    def _fallback_response(self) -> str:
+        """Fallback when LLM fails."""
+        if not self.lead.get("name"):
+            return "Hi! I'm Priya from Raymond Realty. May I know your name?"
+        elif not self.lead.get("phone"):
+            return f"Nice to meet you, {self.lead['name']}! What's your phone number?"
+        elif not self.lead.get("email"):
+            return "And your email address please?"
+        else:
+            return "Would you like me to show you some properties?"
+
+    def _farewell_with_properties(self) -> dict:
+        """Show properties and end conversation."""
+        self._try_save_lead()
+
+        city = self.lead.get("city")
+        bhk = self.lead.get("bhk")
+        budget = self._parse_budget(self.lead.get("budget"))
+        name = self.lead.get("name", "").split()[0] if self.lead.get("name") else ""
+
+        print(f"Searching: city={city}, bhk={bhk}, budget={budget}")
+
+        props = retrieve_properties(location=city, max_price=budget, bhk=bhk)
+
+        if not props and city:
+            print(f"No properties in {city}, showing all...")
+            props = retrieve_properties(max_price=budget, bhk=bhk)
+
+        if props:
+            cards = format_property_cards(props, city, budget, bhk)
+            if city:
+                text = f"Here are {len(cards)} properties in {city} for you{', ' + name if name else ''}! Our team will call you shortly."
+            else:
+                text = f"Here are {len(cards)} great properties for you{', ' + name if name else ''}! Our team will call you shortly."
+
+            self.history.append({"role": "assistant", "content": text})
+            return {"text": text, "properties": cards, "conversation_ended": True}
+
+        # Fallback
+        all_props = retrieve_properties()
+        if all_props:
+            cards = format_property_cards(all_props[:5])
+            text = f"Here are some excellent properties{' for you, ' + name if name else ''}!"
+            return {"text": text, "properties": cards, "conversation_ended": True}
+
+        return {"text": f"Thanks{', ' + name if name else ''}! Our team will contact you soon!", "conversation_ended": True}
+
+    def _parse_budget(self, val):
+        if not val:
             return None
         try:
-            v = str(value).lower()
+            v = str(val).lower()
             if "cr" in v:
                 return int(float(re.sub(r'[^\d.]', '', v.split('cr')[0])) * 10000000)
             if "la" in v:
                 return int(float(re.sub(r'[^\d.]', '', v.split('la')[0])) * 100000)
-            return int(float(re.sub(r'[^\d.]', '', v)) * 100000)
         except:
-            return None
+            pass
+        return None
 
-    def _safe_json(self, text):
-        try:
-            return json.loads(text)
-        except:
-            return {"response": text}
-
-    def _auto_save_lead(self):
-        if self.lead_created:
-            return
-        if not (self.lead_data.get("fullName") and self.lead_data.get("mobileNumber")):
+    def _try_save_lead(self):
+        """Save lead to Salesforce."""
+        if self.lead_saved or not (self.lead.get("name") and self.lead.get("phone")):
             return
 
         try:
@@ -328,16 +324,16 @@ JSON only: {{"arguments":{{"name":null,"phone":null,"email":null}},"response":"r
 
             token = get_access_token()
             payload = {"wl": {
-                "fullName": self.lead_data.get("fullName", ""),
-                "emailAddress": self.lead_data.get("emailAddress", ""),
-                "mobileNumber": self.lead_data.get("mobileNumber", ""),
-                "city": self.lead_data.get("city", "Bangalore"),
-                "budget": str(self.lead_data.get("budget", "")),
-                "configuration": self.lead_data.get("configuration", ""),
-                "source": "AI_VOICE_BOT"
+                "fullName": self.lead.get("name", ""),
+                "emailAddress": self.lead.get("email", ""),
+                "mobileNumber": self.lead.get("phone", ""),
+                "city": self.lead.get("city", "Bangalore"),
+                "budget": str(self.lead.get("budget", "")),
+                "configuration": self.lead.get("bhk", ""),
+                "source": "Website"
             }}
             create_salesforce_lead(payload, token["access_token"], token["instance_url"])
-            self.lead_created = True
-            print(f"✅ Lead saved: {self.lead_data.get('fullName')} - {self.lead_data.get('mobileNumber')}")
+            self.lead_saved = True
+            print(f"Lead saved: {self.lead.get('name')} - {self.lead.get('phone')}")
         except Exception as e:
-            print(f"❌ Lead save error: {e}")
+            print(f"Lead save error: {e}")
