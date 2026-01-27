@@ -29,9 +29,9 @@ class OpenAIClient(LLMClient):
 
         messages = [{"role": "system", "content": system_prompt}]
 
-        # Add conversation history if provided (limit to last 6 messages for speed)
+        # Add conversation history if provided (limit to last 4 messages for speed)
         if history:
-            messages.extend(history[-6:])
+            messages.extend(history[-4:])
 
         # Add current user message
         messages.append({"role": "user", "content": user_text})
@@ -39,10 +39,10 @@ class OpenAIClient(LLMClient):
         response = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            # PERFORMANCE: Limit response length for faster generation
-            max_tokens=150,
+            # PERFORMANCE: Very short responses for voice
+            max_tokens=80,
             # PERFORMANCE: Lower temperature = faster, more deterministic
-            temperature=0.5,
+            temperature=0.3,
         )
 
         result = response.choices[0].message.content
