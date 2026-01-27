@@ -1,4 +1,4 @@
-print("ConversationManager v5.0 - Intelligent human-like chat")
+print("ConversationManager v5.2 - Fixed email validation + responsive property display")
 
 import json
 import re
@@ -61,17 +61,23 @@ class ConversationManager:
         if self._wants_to_end(user_text):
             return self._farewell_with_properties()
 
-        # Step 5: Check if all info collected AND user wants properties
-        if self._has_all_info():
-            if self._wants_properties_now(user_text):
+        # Step 5: Check if user explicitly wants properties NOW
+        if self._wants_properties_now(user_text):
+            # If we have at least name and phone, show properties
+            if self.lead.get("name") and self.lead.get("phone"):
                 return self._farewell_with_properties()
-            # All info collected - offer to show properties
+            # If we have name but no phone, still show but ask for contact
+            elif self.lead.get("name"):
+                return self._farewell_with_properties()
+
+        # Step 6: If all info collected, auto-show properties
+        if self._has_all_info():
             response = self._generate_response(user_text)
-            # Auto-show properties if we have everything
+            # Auto-show properties if LLM mentions showing
             if "show" in response.lower() or "here" in response.lower():
                 return self._farewell_with_properties()
 
-        # Step 6: Generate intelligent response
+        # Step 7: Generate intelligent response
         response = self._generate_response(user_text)
         print(f"Bot: {response}")
 
@@ -91,32 +97,79 @@ class ConversationManager:
             print(f"  City detected: {detected_city}")
 
         # --- PHONE DETECTION with validation ---
-        # Look for any sequence of digits
-        digits = re.sub(r'\D', '', text)
-        if len(digits) >= 8:  # Looks like a phone attempt
-            if len(digits) == 10 and digits[0] in '6789':
-                self.lead["phone"] = digits
-                print(f"  Phone: {digits}")
-            else:
-                # Invalid phone - ask for correction
-                if len(digits) < 10:
-                    return f"That phone number seems incomplete ({len(digits)} digits). Could you please share your 10-digit mobile number?"
-                elif len(digits) > 10:
-                    return f"That seems like too many digits. Could you please share just your 10-digit mobile number?"
-                elif digits[0] not in '6789':
-                    return "Indian mobile numbers start with 6, 7, 8, or 9. Could you please check your number?"
+        # Look for any sequence of digits (skip if we already have valid phone)
+        if not self.lead.get("phone"):
+            digits = re.sub(r'\D', '', text)
+            if len(digits) >= 7:  # Looks like a phone attempt
+                if len(digits) == 10 and digits[0] in '6789':
+                    self.lead["phone"] = digits
+                    print(f"  Phone: {digits}")
+                else:
+                    # Invalid phone - ask for correction with friendly message
+                    if len(digits) < 10:
+                        return f"That seems incomplete - just {len(digits)} digits. Could you share your full 10-digit mobile number?"
+                    elif len(digits) > 10:
+                        return f"That's a few extra digits. Could you share just your 10-digit mobile number?"
+                    elif digits[0] not in '6789':
+                        return "Indian mobile numbers usually start with 6, 7, 8, or 9. Could you please check?"
 
         # --- EMAIL DETECTION with validation ---
-        # Look for anything with @ symbol
-        if '@' in text:
-            email_match = re.search(r'[\w.+-]+@[\w-]+\.[\w.-]+', text)
+        # Look for anything with @ symbol (skip if we already have valid email)
+        if '@' in text and not self.lead.get("email"):
+            # Clean the text - remove trailing punctuation
+            clean_text = text.rstrip('.,!?;:')
+            email_match = re.search(r'[\w.+-]+@[\w-]+\.[\w.-]+', clean_text)
             if email_match:
-                email = email_match.group().lower()
-                # Basic validation
-                if email.endswith('.cm'):
-                    return f"Did you mean {email[:-3]}.com? Please confirm your email."
-                elif not re.search(r'\.(com|in|org|net|co|io|gmail|yahoo|hotmail)$', email, re.I):
-                    return f"'{email}' doesn't look like a valid email. Could you please check it?"
+                email = email_match.group().lower().rstrip('.')  # Remove any trailing dots
+
+                # Extract domain part for validation
+                domain = email.split('@')[1] if '@' in email else ''
+
+                # Check for common TLD typos (only at the END of email)
+                tld_typos = {
+                    '.cm': '.com',
+                    '.con': '.com',
+                    '.cpm': '.com',
+                    '.vom': '.com',
+                    '.ocm': '.com',
+                    '.comm': '.com',
+                    '.coм': '.com',
+                    '.iin': '.in',
+                    '.orgg': '.org',
+                }
+
+                for typo, correction in tld_typos.items():
+                    if email.endswith(typo):
+                        suggested = email[:-len(typo)] + correction
+                        return f"Did you mean {suggested}? Just want to make sure I have it right."
+
+                # Check for common domain typos (exact domain match only)
+                domain_typos = {
+                    'gmial.com': 'gmail.com',
+                    'gmal.com': 'gmail.com',
+                    'gamil.com': 'gmail.com',
+                    'gnail.com': 'gmail.com',
+                    'gmaill.com': 'gmail.com',
+                    'gmali.com': 'gmail.com',
+                    'yaho.com': 'yahoo.com',
+                    'yahooo.com': 'yahoo.com',
+                    'yaoo.com': 'yahoo.com',
+                    'hotmal.com': 'hotmail.com',
+                    'hotmial.com': 'hotmail.com',
+                    'outloo.com': 'outlook.com',
+                    'outlok.com': 'outlook.com',
+                }
+
+                if domain in domain_typos:
+                    suggested = email.replace(domain, domain_typos[domain])
+                    return f"Did you mean {suggested}? Just want to make sure I have it right."
+
+                # Validate domain has proper TLD
+                valid_tlds = ['com', 'in', 'org', 'net', 'co', 'io', 'edu', 'gov', 'info', 'biz', 'co.in', 'org.in', 'ac.in', 'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com']
+                has_valid_tld = any(email.endswith('.' + tld) or email.endswith('@' + tld) for tld in valid_tlds)
+
+                if not has_valid_tld:
+                    return f"That email doesn't look quite right. Could you please check and share it again?"
                 else:
                     self.lead["email"] = email
                     print(f"  Email: {email}")

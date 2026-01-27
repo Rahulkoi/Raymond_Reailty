@@ -8,8 +8,8 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f172a;
-            color: #f1f5f9;
+            background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+            color: #1f2937;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -18,22 +18,31 @@
         }
         .container {
             width: 100%;
-            max-width: 500px;
-            height: 90vh;
-            background: #1e293b;
-            border-radius: 20px;
+            max-width: 480px;
+            height: 85vh;
+            max-height: 700px;
+            background: #ffffff;
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15), 0 0 0 1px rgba(220, 38, 38, 0.1);
         }
         .header {
             padding: 20px;
-            background: linear-gradient(135deg, #6366f1, #0ea5e9);
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
             text-align: center;
         }
-        .header h1 { font-size: 1.2rem; }
-        .header .status { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+        .header .status {
+            font-size: 0.85rem;
+            margin-top: 4px;
+            color: rgba(255,255,255,0.9);
+        }
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -41,7 +50,11 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            background: #fafafa;
         }
+        .messages::-webkit-scrollbar { width: 6px; }
+        .messages::-webkit-scrollbar-track { background: #f1f1f1; }
+        .messages::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 3px; }
         .message {
             max-width: 85%;
             padding: 12px 16px;
@@ -52,44 +65,46 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         .message.user {
             align-self: flex-end;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
         }
         .message.bot {
             align-self: flex-start;
-            background: #334155;
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .property-cards {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-top: 16px;
-            animation: fadeIn 0.5s;
         }
         .property-card {
-            background: linear-gradient(145deg, rgba(99,102,241,0.15), rgba(14,165,233,0.1));
-            border: 1px solid rgba(99,102,241,0.3);
+            background: #ffffff;
+            border: 2px solid #fecaca;
             border-radius: 16px;
             padding: 16px;
             transition: all 0.3s;
         }
         .property-card:hover {
-            border-color: #6366f1;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99,102,241,0.2);
+            border-color: #dc2626;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.15);
         }
         .property-card h4 {
-            color: #818cf8;
+            color: #dc2626;
             margin-bottom: 8px;
             font-size: 1.05rem;
         }
         .property-card .price {
-            color: #10b981;
+            color: #16a34a;
             font-weight: bold;
             font-size: 1.25rem;
             margin-bottom: 8px;
         }
         .property-card .details {
-            color: #94a3b8;
+            color: #6b7280;
             font-size: 0.85rem;
             margin-bottom: 10px;
             line-height: 1.6;
@@ -100,8 +115,8 @@
             flex-wrap: wrap;
         }
         .property-card .links a {
-            background: rgba(99,102,241,0.2);
-            color: #818cf8;
+            background: #fee2e2;
+            color: #dc2626;
             padding: 8px 14px;
             border-radius: 20px;
             text-decoration: none;
@@ -110,72 +125,108 @@
             transition: all 0.2s;
         }
         .property-card .links a:hover {
-            background: #6366f1;
+            background: #dc2626;
             color: white;
         }
         .fallback-notice {
-            background: rgba(245,158,11,0.15);
-            border: 1px solid rgba(245,158,11,0.3);
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 12px;
             font-size: 0.9rem;
-            color: #fbbf24;
+            color: #92400e;
         }
         .controls {
             padding: 20px;
-            background: rgba(0,0,0,0.2);
+            background: #ffffff;
+            border-top: 1px solid #f3f4f6;
             text-align: center;
         }
         .voice-status {
             margin-bottom: 16px;
-            padding: 10px;
+            padding: 10px 16px;
             border-radius: 10px;
             font-size: 0.9rem;
+            font-weight: 500;
         }
-        .voice-status.listening { background: rgba(239,68,68,0.2); color: #f87171; }
-        .voice-status.speaking { background: rgba(16,185,129,0.2); color: #34d399; }
+        .voice-status.listening { background: #fee2e2; color: #dc2626; }
+        .voice-status.speaking { background: #dcfce7; color: #16a34a; }
+        .voice-status.inactive { background: #f3f4f6; color: #6b7280; }
         .btn-voice {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            border: 3px solid #475569;
-            background: #334155;
-            color: #94a3b8;
-            font-size: 2rem;
+            border: 3px solid #dc2626;
+            background: #ffffff;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
         }
-        .btn-voice:hover { border-color: #6366f1; }
+        .btn-voice img {
+            width: 50px;
+            height: 50px;
+            transition: all 0.3s;
+        }
+        .btn-voice:hover {
+            background: #fef2f2;
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
+        }
         .btn-voice.active {
-            background: #ef4444;
-            border-color: #ef4444;
-            color: white;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-color: #dc2626;
             animation: pulse 1.5s infinite;
         }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
-            50% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
+        .btn-voice.active img {
+            filter: brightness(0) invert(1);
         }
-        .typing { display: flex; gap: 4px; padding: 12px 16px; background: #334155; border-radius: 16px; width: fit-content; }
-        .typing span { width: 8px; height: 8px; background: #64748b; border-radius: 50%; animation: bounce 1.4s infinite; }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(220,38,38,0); }
+        }
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            width: fit-content;
+        }
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: #dc2626;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
         .typing span:nth-child(2) { animation-delay: 0.2s; }
         .typing span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
+
+        @media (max-width: 500px) {
+            body { padding: 0; background: #ffffff; }
+            .container { height: 100vh; max-height: 100vh; border-radius: 0; box-shadow: none; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Raymond Realty Voice</h1>
-            <div class="status" id="status">Click mic to start</div>
+            <div class="status" id="status">Tap to start conversation</div>
         </div>
         <div class="messages" id="messages">
-            <div class="message bot">Hi! Click the microphone to start talking with me about properties.</div>
+            <div class="message bot">Hi! Tap the button below to start talking with me about properties.</div>
         </div>
         <div class="controls">
-            <div class="voice-status" id="voiceStatus">Ready</div>
-            <button class="btn-voice" id="voiceBtn" onclick="toggleVoice()">🎤</button>
+            <div class="voice-status inactive" id="voiceStatus">Ready to assist</div>
+            <button class="btn-voice" id="voiceBtn" onclick="toggleVoice()">
+                <img src="https://cdn-icons-png.flaticon.com/512/17030/17030777.png" alt="AI Voice">
+            </button>
         </div>
     </div>
 
@@ -189,9 +240,9 @@
         let playbackCtx = null;
         let propertiesShown = false;
 
-        // Conversation tracking
         let transcript = [];
         let sessionId = 'session_' + Date.now();
+        let collectedInfo = { name: null, phone: null, email: null, city: null };
 
         const messagesEl = document.getElementById('messages');
         const voiceBtn = document.getElementById('voiceBtn');
@@ -207,10 +258,8 @@
         }
 
         async function startConversation() {
-            propertiesShown = false;
             try {
                 statusEl.textContent = 'Connecting...';
-
                 const res = await fetch('/elevenlabs/get-signed-url');
                 if (!res.ok) throw new Error('Failed to get signed URL');
                 const { signed_url } = await res.json();
@@ -221,13 +270,18 @@
                     console.log('Connected to ElevenLabs');
                     isActive = true;
                     statusEl.textContent = 'Connected';
+                    if (collectedInfo.name || collectedInfo.phone || collectedInfo.email) {
+                        const context = buildContextMessage();
+                        if (context) {
+                            ws.send(JSON.stringify({ type: 'contextual_update', text: context }));
+                        }
+                    }
                     startMicrophone();
                 };
 
                 ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
                 ws.onerror = (e) => { console.error('WS error:', e); endConversation(); };
                 ws.onclose = () => { if (isActive) endConversation(); };
-
             } catch (e) {
                 console.error('Connection failed:', e);
                 statusEl.textContent = 'Connection failed';
@@ -235,66 +289,44 @@
         }
 
         function handleMessage(msg) {
-            console.log('Message:', msg.type);
-
             switch (msg.type) {
                 case 'conversation_initiation_metadata':
-                    statusEl.textContent = 'Ready - Speak now';
+                    statusEl.textContent = 'Speak now';
                     updateUI('listening');
                     break;
-
                 case 'user_transcript':
                     const userText = msg.user_transcription_event?.user_transcript || msg.user_transcript;
                     if (userText) {
                         hideTyping();
                         addMessage('user', userText);
                         transcript.push({ role: 'user', text: userText });
+                        extractInfoFromTranscript(userText, 'user');
                         showTyping();
                     }
                     break;
-
                 case 'agent_response':
                     const botText = msg.agent_response_event?.agent_response || msg.agent_response;
                     if (botText) {
                         hideTyping();
                         addMessage('bot', botText);
                         transcript.push({ role: 'agent', text: botText });
-
-                        // Check if conversation is ending - expanded patterns
+                        extractInfoFromTranscript(botText, 'agent');
                         const lower = botText.toLowerCase();
-                        const endingPhrases = [
-                            'goodbye', 'bye', 'take care', 'talk soon',
-                            'will call you', 'will contact', 'have a great day',
-                            'nice talking', 'thank you for', 'thanks for',
-                            'been a pleasure', 'look forward', 'speak soon',
-                            'reach out', 'get back to you', 'will be in touch'
-                        ];
-                        const isEnding = endingPhrases.some(phrase => lower.includes(phrase));
-
-                        console.log('Agent response:', botText);
-                        console.log('Is ending phrase:', isEnding, 'Properties shown:', propertiesShown);
-
-                        if (isEnding && !propertiesShown) {
+                        const endingPhrases = ['goodbye', 'bye', 'take care', 'talk soon', 'will call you', 'will contact', 'have a great day', 'nice talking', 'thank you for', 'thanks for', 'been a pleasure', 'look forward', 'speak soon', 'reach out', 'get back to you', 'will be in touch'];
+                        if (endingPhrases.some(phrase => lower.includes(phrase)) && !propertiesShown) {
                             propertiesShown = true;
-                            console.log('Showing properties and capturing lead...');
                             setTimeout(() => showPropertiesAndCaptureLead(), 500);
                         }
                     }
                     break;
-
                 case 'audio':
                     const audio = msg.audio_event?.audio_base_64 || msg.audio;
-                    if (audio) {
-                        updateUI('speaking');
-                        queueAudio(audio);
-                    }
+                    if (audio) { updateUI('speaking'); queueAudio(audio); }
                     break;
-
                 case 'ping':
                     const eventId = msg.ping_event?.event_id;
                     if (eventId) ws.send(JSON.stringify({ type: 'pong', event_id: eventId }));
                     break;
-
                 case 'interruption':
                 case 'agent_audio_interrupted':
                     stopAudio();
@@ -303,133 +335,116 @@
             }
         }
 
-        async function showPropertiesAndCaptureLead() {
-            // Extract search criteria from transcript
-            const allUserText = transcript
-                .filter(t => t.role === 'user')
-                .map(t => t.text)
-                .join(' ')
-                .toLowerCase();
+        function buildContextMessage() {
+            const parts = [];
+            if (collectedInfo.name) parts.push(`User's name is ${collectedInfo.name}`);
+            if (collectedInfo.phone) parts.push(`Phone is ${collectedInfo.phone}`);
+            if (collectedInfo.email) parts.push(`Email is ${collectedInfo.email}`);
+            if (collectedInfo.city) parts.push(`Looking for property in ${collectedInfo.city}`);
+            return parts.length > 0 ? `[CONTEXT: ${parts.join('. ')}. Do NOT ask for this info again.]` : null;
+        }
 
-            // Extract location
-            let location = null;
-            const locationMap = {
-                'bangalore': 'Bangalore',
-                'bengaluru': 'Bangalore',
-                'banglore': 'Bangalore',
-                'thane': 'Thane',
-                'mumbai': 'Mumbai',
-                'whitefield': 'Whitefield',
-                'electronic city': 'Electronic City'
-            };
-            for (const [key, val] of Object.entries(locationMap)) {
-                if (allUserText.includes(key)) {
-                    location = val;
-                    break;
+        function extractInfoFromTranscript(text, role) {
+            const lower = text.toLowerCase();
+            if (role === 'user') {
+                const phoneMatch = text.match(/\b([6-9]\d{9})\b/);
+                if (phoneMatch) collectedInfo.phone = phoneMatch[1];
+                const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+                if (emailMatch) collectedInfo.email = emailMatch[0].toLowerCase();
+                const cities = ['bangalore', 'mumbai', 'thane', 'pune', 'delhi', 'hyderabad'];
+                for (const city of cities) {
+                    if (lower.includes(city)) { collectedInfo.city = city.charAt(0).toUpperCase() + city.slice(1); break; }
                 }
             }
+            if (role === 'agent') {
+                const nameMatch = text.match(/(?:name|have)\s+(?:is\s+)?([A-Z][a-z]+)/i);
+                if (nameMatch && !['Your', 'The', 'What', 'May', 'Can'].includes(nameMatch[1])) collectedInfo.name = nameMatch[1];
+                const phoneConfirm = text.match(/phone\s+(?:is\s+)?(\d[\d\s-]+)/i);
+                if (phoneConfirm) { const digits = phoneConfirm[1].replace(/\D/g, ''); if (digits.length === 10) collectedInfo.phone = digits; }
+            }
+        }
 
-            // Extract BHK
+        async function showPropertiesAndCaptureLead() {
+            const allUserText = transcript.filter(t => t.role === 'user').map(t => t.text).join(' ').toLowerCase();
+            let location = collectedInfo.city;
+            if (!location) {
+                const locationMap = { 'bangalore': 'Bangalore', 'bengaluru': 'Bangalore', 'thane': 'Thane', 'mumbai': 'Mumbai', 'whitefield': 'Whitefield' };
+                for (const [key, val] of Object.entries(locationMap)) { if (allUserText.includes(key)) { location = val; break; } }
+            }
             let bhk = null;
             const bhkMatch = allUserText.match(/(\d)\s*bhk/);
             if (bhkMatch) bhk = bhkMatch[1] + ' BHK';
-
-            // Extract budget
             let budget = null;
             const crMatch = allUserText.match(/(\d+\.?\d*)\s*(?:crore|cr)/);
             const lakhMatch = allUserText.match(/(\d+\.?\d*)\s*(?:lakh|lac)/);
             if (crMatch) budget = crMatch[1] + ' crore';
             else if (lakhMatch) budget = lakhMatch[1] + ' lakh';
 
-            console.log('🔍 Search criteria:', { location, bhk, budget });
-
-            // Fetch properties from API
             try {
                 const params = new URLSearchParams();
                 if (location) params.append('location', location);
                 if (bhk) params.append('bhk', bhk);
                 if (budget) params.append('budget', budget);
-
                 const res = await fetch(`/api/properties/search?${params}`);
                 const data = await res.json();
+                if (data.properties?.length > 0) showPropertyCards(data.properties, data.is_fallback, location);
+            } catch (e) { console.error('Property fetch error:', e); }
 
-                console.log('🏠 Properties found:', data);
-
-                if (data.properties && data.properties.length > 0) {
-                    showPropertyCards(data.properties, data.is_fallback, location);
-                }
-
-            } catch (e) {
-                console.error('Property fetch error:', e);
-            }
-
-            // Capture lead
             try {
-                const res = await fetch('/api/voice/capture-lead', {
+                await fetch('/api/voice/capture-lead', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: sessionId, transcript })
                 });
-                const data = await res.json();
-                console.log('Lead capture:', data);
-            } catch (e) {
-                console.error('Lead capture error:', e);
-            }
+            } catch (e) { console.error('Lead capture error:', e); }
         }
 
         function showPropertyCards(properties, isFallback, searchLocation) {
             const container = document.createElement('div');
             container.className = 'property-cards';
-
-            // Show fallback notice if needed
             if (isFallback) {
                 const notice = document.createElement('div');
                 notice.className = 'fallback-notice';
-                notice.innerHTML = `✨ Here are some excellent Raymond Realty projects you might like!`;
+                notice.innerHTML = 'Here are some excellent Raymond Realty projects!';
                 container.appendChild(notice);
             } else if (searchLocation) {
                 const notice = document.createElement('div');
                 notice.className = 'fallback-notice';
-                notice.style.background = 'rgba(16,185,129,0.15)';
-                notice.style.borderColor = 'rgba(16,185,129,0.3)';
-                notice.style.color = '#34d399';
-                notice.innerHTML = `🏠 Found ${properties.length} properties in ${searchLocation}`;
+                notice.style.background = '#dcfce7';
+                notice.style.borderColor = '#86efac';
+                notice.style.color = '#166534';
+                notice.innerHTML = `Found ${properties.length} properties in ${searchLocation}`;
                 container.appendChild(notice);
             }
-
-            // Add property cards
             properties.forEach(p => {
                 const price = formatPrice(p.price);
                 const card = document.createElement('div');
                 card.className = 'property-card';
                 card.innerHTML = `
                     <h4>${escapeHtml(p.name)}</h4>
-                    <div class="price">₹ ${price}</div>
+                    <div class="price">${price}</div>
                     <div class="details">
                         <strong>${escapeHtml(p.bhk)}</strong> ${escapeHtml(p.type || 'Apartment')} in ${escapeHtml(p.location)}<br>
-                        ${p.area_sqft ? `📐 ${p.area_sqft} sq.ft` : ''}
-                        ${p.possession ? ` • 🏠 ${escapeHtml(p.possession)}` : ''}
-                        ${p.builder ? `<br>🏗️ ${escapeHtml(p.builder)}` : ''}
+                        ${p.area_sqft ? `${p.area_sqft} sq.ft` : ''} ${p.possession ? `| ${escapeHtml(p.possession)}` : ''}
+                        ${p.builder ? `<br>${escapeHtml(p.builder)}` : ''}
                     </div>
                     <div class="links">
-                        ${p.property_url ? `<a href="${p.property_url}" target="_blank">📋 Details</a>` : ''}
-                        ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">🎥 Tour</a>` : ''}
-                        ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
+                        ${p.property_url ? `<a href="${p.property_url}" target="_blank">Details</a>` : ''}
+                        ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">Virtual Tour</a>` : ''}
+                        ${p.contact_number ? `<a href="tel:${p.contact_number}">Call Now</a>` : ''}
                     </div>
                 `;
                 container.appendChild(card);
             });
-
             messagesEl.appendChild(container);
             messagesEl.scrollTop = messagesEl.scrollHeight;
         }
 
         function formatPrice(price) {
-            if (!price) return 'On Request';
-            if (price >= 10000000) {
-                return (price / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
-            }
-            return (price / 100000).toFixed(0) + ' Lakh';
+            if (!price) return 'Price on Request';
+            if (typeof price === 'string') return price;
+            if (price >= 10000000) return '₹ ' + (price / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+            return '₹ ' + (price / 100000).toFixed(0) + ' Lakh';
         }
 
         function escapeHtml(text) {
@@ -439,59 +454,36 @@
             return div.innerHTML;
         }
 
-        function endConversation() {
+        function endConversation(fullReset = false) {
             isActive = false;
             updateUI('inactive');
-            statusEl.textContent = 'Click mic to start';
-
-            // Show properties if not already shown
-            if (transcript.length > 0 && !propertiesShown) {
-                propertiesShown = true;
-                showPropertiesAndCaptureLead();
-            }
-
-            // Cleanup
+            statusEl.textContent = 'Tap to continue';
+            if (transcript.length > 0 && !propertiesShown) { propertiesShown = true; showPropertiesAndCaptureLead(); }
             stopMicrophone();
             stopAudio();
             if (ws) { ws.close(); ws = null; }
-
-            // Reset for next conversation
-            transcript = [];
-            sessionId = 'session_' + Date.now();
+            if (fullReset) { transcript = []; sessionId = 'session_' + Date.now(); collectedInfo = { name: null, phone: null, email: null, city: null }; propertiesShown = false; }
         }
 
         async function startMicrophone() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true }
-                });
-
+                stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true } });
                 audioContext = new AudioContext({ sampleRate: 16000 });
                 analyser = audioContext.createAnalyser();
                 microphone = audioContext.createMediaStreamSource(stream);
                 microphone.connect(analyser);
-
                 processor = audioContext.createScriptProcessor(2048, 1, 1);
                 processor.onaudioprocess = (e) => {
                     if (!isActive || !ws || ws.readyState !== WebSocket.OPEN) return;
-
                     const input = e.inputBuffer.getChannelData(0);
                     const pcm16 = new Int16Array(input.length);
-                    for (let i = 0; i < input.length; i++) {
-                        const s = Math.max(-1, Math.min(1, input[i]));
-                        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-                    }
+                    for (let i = 0; i < input.length; i++) { const s = Math.max(-1, Math.min(1, input[i])); pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF; }
                     ws.send(JSON.stringify({ user_audio_chunk: btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer))) }));
                 };
-
                 microphone.connect(processor);
                 processor.connect(audioContext.destination);
                 updateUI('listening');
-
-            } catch (e) {
-                console.error('Mic error:', e);
-                statusEl.textContent = 'Mic access denied';
-            }
+            } catch (e) { console.error('Mic error:', e); statusEl.textContent = 'Mic access denied'; }
         }
 
         function stopMicrophone() {
@@ -510,19 +502,12 @@
         }
 
         async function playNext() {
-            if (audioQueue.length === 0) {
-                isPlaying = false;
-                if (isActive) updateUI('listening');
-                return;
-            }
-
+            if (audioQueue.length === 0) { isPlaying = false; if (isActive) updateUI('listening'); return; }
             isPlaying = true;
             const buffer = audioQueue.shift();
-
             try {
                 if (!playbackCtx) playbackCtx = new AudioContext();
                 if (playbackCtx.state === 'suspended') await playbackCtx.resume();
-
                 const audioBuffer = await playbackCtx.decodeAudioData(buffer.slice(0));
                 currentSource = playbackCtx.createBufferSource();
                 currentSource.buffer = audioBuffer;
@@ -534,62 +519,24 @@
                     const pcm = new Int16Array(buffer);
                     const float = new Float32Array(pcm.length);
                     for (let i = 0; i < pcm.length; i++) float[i] = pcm[i] / 32768;
-
                     if (!playbackCtx) playbackCtx = new AudioContext();
                     const audioBuffer = playbackCtx.createBuffer(1, float.length, 16000);
                     audioBuffer.getChannelData(0).set(float);
-
                     currentSource = playbackCtx.createBufferSource();
                     currentSource.buffer = audioBuffer;
                     currentSource.connect(playbackCtx.destination);
                     currentSource.onended = playNext;
                     currentSource.start();
-                } catch (e2) {
-                    console.error('Audio error:', e2);
-                    playNext();
-                }
+                } catch (e2) { console.error('Audio error:', e2); playNext(); }
             }
         }
 
-        function stopAudio() {
-            audioQueue = [];
-            isPlaying = false;
-            if (currentSource) { try { currentSource.stop(); } catch(e){} currentSource = null; }
-        }
-
-        function addMessage(role, text) {
-            const div = document.createElement('div');
-            div.className = 'message ' + role;
-            div.textContent = text;
-            messagesEl.appendChild(div);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-        }
-
-        function showTyping() {
-            if (document.getElementById('typing')) return;
-            const div = document.createElement('div');
-            div.id = 'typing';
-            div.className = 'typing';
-            div.innerHTML = '<span></span><span></span><span></span>';
-            messagesEl.appendChild(div);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-        }
-
-        function hideTyping() {
-            const t = document.getElementById('typing');
-            if (t) t.remove();
-        }
-
-        function updateUI(state) {
-            voiceBtn.className = 'btn-voice' + (state === 'listening' || state === 'speaking' ? ' active' : '');
-            voiceStatus.className = 'voice-status ' + state;
-
-            const texts = { inactive: 'Ready', listening: 'Listening...', speaking: 'Speaking...' };
-            voiceStatus.textContent = texts[state] || 'Ready';
-            voiceBtn.textContent = isActive ? '⏹️' : '🎤';
-        }
-
-        window.onbeforeunload = endConversation;
+        function stopAudio() { audioQueue = []; isPlaying = false; if (currentSource) { try { currentSource.stop(); } catch(e){} currentSource = null; } }
+        function addMessage(role, text) { const div = document.createElement('div'); div.className = 'message ' + role; div.textContent = text; messagesEl.appendChild(div); messagesEl.scrollTop = messagesEl.scrollHeight; }
+        function showTyping() { if (document.getElementById('typing')) return; const div = document.createElement('div'); div.id = 'typing'; div.className = 'typing'; div.innerHTML = '<span></span><span></span><span></span>'; messagesEl.appendChild(div); messagesEl.scrollTop = messagesEl.scrollHeight; }
+        function hideTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+        function updateUI(state) { voiceBtn.className = 'btn-voice' + (state === 'listening' || state === 'speaking' ? ' active' : ''); voiceStatus.className = 'voice-status ' + state; const texts = { inactive: 'Ready to assist', listening: 'Listening...', speaking: 'Speaking...' }; voiceStatus.textContent = texts[state] || 'Ready to assist'; }
+        window.onbeforeunload = () => endConversation(true);
     </script>
 </body>
 </html>

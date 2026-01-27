@@ -4,468 +4,369 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raymond Realty - Chat Assistant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #0ea5e9;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #475569;
-            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+            color: #1f2937;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background-image:
-                radial-gradient(at 20% 80%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
-                radial-gradient(at 80% 20%, rgba(14, 165, 233, 0.15) 0, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0, transparent 50%);
         }
-
-        .chat-container {
+        .container {
             width: 100%;
-            max-width: 900px;
-            height: 90vh;
-            max-height: 800px;
-            background: var(--bg-card);
+            max-width: 480px;
+            height: 85vh;
+            max-height: 700px;
+            background: #ffffff;
             border-radius: 24px;
-            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15), 0 0 0 1px rgba(220, 38, 38, 0.1);
         }
-
-        .chat-header {
-            padding: 20px 24px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
-        .header-left {
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
             display: flex;
             align-items: center;
             gap: 14px;
         }
-
-        .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+        .header-icon {
+            width: 44px;
+            height: 44px;
             background: rgba(255,255,255,0.2);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            backdrop-filter: blur(10px);
         }
-
+        .header-icon img {
+            width: 28px;
+            height: 28px;
+            filter: brightness(0) invert(1);
+        }
         .header-info h1 {
             font-size: 1.1rem;
             font-weight: 600;
             color: white;
         }
-
         .header-info .status {
             font-size: 0.8rem;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.9);
             display: flex;
             align-items: center;
             gap: 6px;
         }
-
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #10b981;
+            background: #86efac;
             animation: pulse-dot 2s infinite;
         }
-
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-
-        .messages-container {
+        .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            scroll-behavior: smooth;
+            gap: 12px;
+            background: #fafafa;
         }
-
-        .messages-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-
+        .messages::-webkit-scrollbar { width: 6px; }
+        .messages::-webkit-scrollbar-track { background: #f1f1f1; }
+        .messages::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 3px; }
         .message {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             max-width: 85%;
-            animation: slideIn 0.3s ease-out;
+            animation: fadeIn 0.3s;
         }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         .message.user {
             align-self: flex-end;
             flex-direction: row-reverse;
         }
-
         .message-avatar {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
             flex-shrink: 0;
+            overflow: hidden;
         }
-
         .message.assistant .message-avatar {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #dc2626, #ef4444);
         }
-
+        .message.assistant .message-avatar img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+        }
         .message.user .message-avatar {
-            background: var(--bg-input);
+            background: #e5e7eb;
+            font-size: 14px;
         }
-
         .message-content {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
-
-        .message.user .message-content {
-            align-items: flex-end;
-        }
-
+        .message.user .message-content { align-items: flex-end; }
         .message-bubble {
-            padding: 14px 18px;
-            border-radius: 18px;
+            padding: 12px 16px;
+            border-radius: 16px;
             line-height: 1.5;
             font-size: 0.95rem;
         }
-
         .message.assistant .message-bubble {
-            background: var(--bg-input);
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #e5e7eb;
             border-bottom-left-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-
         .message.user .message-bubble {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
             border-bottom-right-radius: 6px;
         }
-
         .message-time {
             font-size: 0.7rem;
-            color: var(--text-muted);
+            color: #9ca3af;
             padding: 0 8px;
         }
-
         .property-cards {
-            display: grid;
+            display: flex;
+            flex-direction: column;
             gap: 12px;
             margin-top: 12px;
         }
-
         .property-card {
-            background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(14,165,233,0.05));
-            border: 1px solid rgba(99,102,241,0.2);
+            background: #ffffff;
+            border: 2px solid #fecaca;
             border-radius: 16px;
             padding: 16px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
-
         .property-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99,102,241,0.2);
+            border-color: #dc2626;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.15);
         }
-
         .property-card h4 {
-            color: var(--primary-light);
+            color: #dc2626;
             font-size: 1rem;
             margin-bottom: 8px;
             font-weight: 600;
         }
-
         .property-card .price {
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--success);
+            color: #16a34a;
             margin-bottom: 8px;
         }
-
         .property-card .details {
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            color: #6b7280;
             margin-bottom: 8px;
             line-height: 1.5;
         }
-
         .property-card .amenities {
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: #9ca3af;
             margin-bottom: 12px;
         }
-
         .property-links {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
-
         .property-links a {
-            background: rgba(99,102,241,0.15);
-            color: var(--primary-light);
+            background: #fee2e2;
+            color: #dc2626;
             padding: 6px 14px;
             border-radius: 20px;
             text-decoration: none;
             font-size: 0.8rem;
             font-weight: 500;
             transition: all 0.2s;
-            border: 1px solid transparent;
         }
-
         .property-links a:hover {
-            background: var(--primary);
+            background: #dc2626;
             color: white;
-            border-color: var(--primary);
         }
-
         .typing-indicator {
             display: flex;
             gap: 4px;
-            padding: 16px 20px;
-            background: var(--bg-input);
-            border-radius: 18px;
+            padding: 14px 18px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
             border-bottom-left-radius: 6px;
             width: fit-content;
         }
-
         .typing-indicator span {
             width: 8px;
             height: 8px;
-            background: var(--text-muted);
+            background: #dc2626;
             border-radius: 50%;
             animation: typing 1.4s infinite;
         }
-
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-8px); }
         }
-
         .input-area {
-            padding: 20px 24px;
-            background: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 16px 20px;
+            background: #ffffff;
+            border-top: 1px solid #f3f4f6;
         }
-
         .input-row {
             display: flex;
             gap: 12px;
             align-items: flex-end;
         }
-
-        .text-input-wrapper {
-            flex: 1;
-            position: relative;
-        }
-
         .text-input {
-            width: 100%;
-            background: var(--bg-input);
-            border: 2px solid transparent;
+            flex: 1;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
             border-radius: 16px;
             padding: 14px 18px;
-            color: var(--text-primary);
+            color: #1f2937;
             font-size: 0.95rem;
             font-family: inherit;
             outline: none;
             transition: all 0.2s;
             resize: none;
-            max-height: 120px;
+            max-height: 100px;
         }
-
         .text-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
+            border-color: #dc2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
         }
-
-        .text-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
+        .text-input::placeholder { color: #9ca3af; }
+        .btn-send {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             border: none;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
             transition: all 0.2s;
         }
-
-        .btn-send {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
         .btn-send:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
         }
-
         .btn-send:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
-
-        @media (max-width: 600px) {
-            body { padding: 0; }
-            .chat-container {
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-            .chat-header { padding: 16px; }
-            .messages-container { padding: 16px; }
-            .input-area { padding: 16px; }
-            .message { max-width: 90%; }
-        }
-
         .welcome-message {
             text-align: center;
-            padding: 40px 20px;
-            animation: fadeIn 0.5s ease-out;
+            padding: 30px 20px;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .welcome-message .icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
         }
-
-        .welcome-message .emoji {
-            font-size: 3rem;
-            margin-bottom: 16px;
+        .welcome-message .icon img {
+            width: 100%;
+            height: 100%;
         }
-
         .welcome-message h2 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-bottom: 8px;
-            color: var(--text-primary);
+            color: #dc2626;
         }
-
         .welcome-message p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            max-width: 400px;
-            margin: 0 auto;
+            color: #6b7280;
+            font-size: 0.9rem;
             line-height: 1.6;
         }
-
         .quick-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 16px;
         }
-
         .quick-action {
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            padding: 10px 16px;
+            background: #ffffff;
+            border: 2px solid #fecaca;
+            color: #dc2626;
+            padding: 8px 14px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s;
         }
-
         .quick-action:hover {
-            border-color: var(--primary);
-            color: var(--primary-light);
-            background: rgba(99,102,241,0.1);
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+        .conversation-ended {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            text-align: center;
+            color: #166534;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 500px) {
+            body { padding: 0; background: #ffffff; }
+            .container { height: 100vh; max-height: 100vh; border-radius: 0; box-shadow: none; }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="header-left">
-                <div class="avatar">🏠</div>
-                <div class="header-info">
-                    <h1>Raymond Realty Chat</h1>
-                    <div class="status">
-                        <span class="status-dot"></span>
-                        <span>Online</span>
-                    </div>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/17030/17030777.png" alt="AI">
+            </div>
+            <div class="header-info">
+                <h1>Raymond Realty Chat</h1>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span>Online</span>
                 </div>
             </div>
         </div>
 
-        <div class="messages-container" id="messagesContainer">
+        <div class="messages" id="messagesContainer">
             <div class="welcome-message">
-                <div class="emoji">💬</div>
+                <div class="icon">
+                    <img src="https://cdn-icons-png.flaticon.com/512/17030/17030777.png" alt="AI Assistant">
+                </div>
                 <h2>Welcome to Raymond Realty!</h2>
-                <p>I'm your AI assistant. Ask me about properties, prices, locations, or anything about real estate.</p>
+                <p>I'm your AI assistant. Ask me about properties, prices, or schedule a site visit.</p>
                 <div class="quick-actions">
                     <button class="quick-action" onclick="sendQuickMessage('Show me properties in Thane')">Properties in Thane</button>
-                    <button class="quick-action" onclick="sendQuickMessage('What is my budget for 2 BHK?')">2 BHK Options</button>
-                    <button class="quick-action" onclick="sendQuickMessage('Tell me about amenities')">Amenities</button>
+                    <button class="quick-action" onclick="sendQuickMessage('I want a 2 BHK')">2 BHK Options</button>
                     <button class="quick-action" onclick="sendQuickMessage('Schedule a site visit')">Site Visit</button>
                 </div>
             </div>
@@ -473,17 +374,12 @@
 
         <div class="input-area">
             <div class="input-row">
-                <div class="text-input-wrapper">
-                    <textarea
-                        class="text-input"
-                        id="textInput"
-                        placeholder="Type your message..."
-                        rows="1"
-                        onkeydown="handleKeyDown(event)"
-                        oninput="autoResize(this)"
-                    ></textarea>
-                </div>
-                <button class="btn btn-send" id="sendBtn" onclick="sendTextMessage()">➤</button>
+                <textarea class="text-input" id="textInput" placeholder="Type your message..." rows="1" onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+                <button class="btn-send" id="sendBtn" onclick="sendTextMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -495,7 +391,7 @@
 
         function autoResize(el) {
             el.style.height = 'auto';
-            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px';
         }
 
         function handleKeyDown(e) {
@@ -510,17 +406,17 @@
             sendTextMessage();
         }
 
-        function addMessage(role, text, properties = null, isFallback = false) {
+        function addMessage(role, text, properties = null) {
             const welcome = messagesContainer.querySelector('.welcome-message');
             if (welcome) welcome.remove();
 
             const msg = document.createElement('div');
             msg.className = 'message ' + role;
-
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let avatarContent = role === 'user' ? '👤' : '<img src="https://cdn-icons-png.flaticon.com/512/17030/17030777.png" alt="AI">';
 
             let html = `
-                <div class="message-avatar">${role === 'user' ? '👤' : '🏠'}</div>
+                <div class="message-avatar">${avatarContent}</div>
                 <div class="message-content">
                     <div class="message-bubble">${escapeHtml(text)}</div>
                     <div class="message-time">${time}</div>
@@ -529,7 +425,7 @@
             if (properties && properties.length > 0) {
                 html += '<div class="property-cards">';
                 for (const p of properties) {
-                    const pricePerSqft = p.price_per_sqft || (p.area_sqft && p.price_raw ? Math.round(p.price_raw / p.area_sqft) : null);
+                    const pricePerSqft = p.price_raw && p.area_sqft ? Math.round(p.price_raw / p.area_sqft) : null;
                     html += `
                         <div class="property-card">
                             <h4>${escapeHtml(p.name)}</h4>
@@ -537,24 +433,17 @@
                             <div class="details">
                                 <strong>${escapeHtml(p.bhk || '')}</strong> ${escapeHtml(p.type || 'Apartment')} in ${escapeHtml(p.location || '')}
                                 <br>
-                                ${p.area_sqft ? `📐 ${escapeHtml(String(p.area_sqft))} sq.ft` : ''}
-                                ${pricePerSqft ? ` • ₹${pricePerSqft.toLocaleString()}/sqft` : ''}
+                                ${p.area_sqft ? `${p.area_sqft} sq.ft` : ''}
+                                ${pricePerSqft ? ` | ₹${pricePerSqft.toLocaleString()}/sqft` : ''}
                                 <br>
-                                ${p.possession ? `🏠 ${escapeHtml(p.possession)}` : ''}
-                                ${p.builder ? ` • 🏗️ ${escapeHtml(p.builder)}` : ''}
+                                ${p.possession ? `${escapeHtml(p.possession)}` : ''}
+                                ${p.builder ? ` | ${escapeHtml(p.builder)}` : ''}
                             </div>
-                            ${p.nearby_metro || p.nearby_mall ? `
-                            <div class="nearby" style="font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0; line-height: 1.4;">
-                                ${p.nearby_metro ? `🚇 ${escapeHtml(p.nearby_metro)}<br>` : ''}
-                                ${p.nearby_mall ? `🛒 ${escapeHtml(p.nearby_mall)}` : ''}
-                            </div>
-                            ` : ''}
-                            <div class="amenities">${p.amenities ? escapeHtml(p.amenities.slice(0, 4).join(' • ')) : ''}</div>
+                            ${p.amenities && p.amenities.length ? `<div class="amenities">${escapeHtml(p.amenities.slice(0, 4).join(' • '))}</div>` : ''}
                             <div class="property-links">
-                                ${p.property_url ? `<a href="${p.property_url}" target="_blank">📋 Details</a>` : ''}
-                                ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">🎥 Tour</a>` : ''}
-                                ${p.brochure_url ? `<a href="${p.brochure_url}" target="_blank">📄 Brochure</a>` : ''}
-                                ${p.contact_number ? `<a href="tel:${p.contact_number}">📞 Call</a>` : ''}
+                                ${p.property_url ? `<a href="${p.property_url}" target="_blank">Details</a>` : ''}
+                                ${p.virtual_tour_url ? `<a href="${p.virtual_tour_url}" target="_blank">Virtual Tour</a>` : ''}
+                                ${p.contact_number ? `<a href="tel:${p.contact_number}">Call Now</a>` : ''}
                             </div>
                         </div>
                     `;
@@ -565,6 +454,14 @@
             html += '</div>';
             msg.innerHTML = html;
             messagesContainer.appendChild(msg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showConversationEnded() {
+            const notice = document.createElement('div');
+            notice.className = 'conversation-ended';
+            notice.innerHTML = '✓ Thank you! Our team will contact you shortly.';
+            messagesContainer.appendChild(notice);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
@@ -580,7 +477,7 @@
             typing.className = 'message assistant';
             typing.id = 'typingIndicator';
             typing.innerHTML = `
-                <div class="message-avatar">🏠</div>
+                <div class="message-avatar"><img src="https://cdn-icons-png.flaticon.com/512/17030/17030777.png" alt="AI"></div>
                 <div class="message-content">
                     <div class="typing-indicator">
                         <span></span><span></span><span></span>
@@ -613,42 +510,17 @@
                 });
 
                 const data = await response.json();
-                console.log('API Response:', data);
                 hideTyping();
+                addMessage('assistant', data.text, data.properties);
 
-                // Check if response has properties
-                if (data.properties && data.properties.length > 0) {
-                    console.log('Properties found:', data.properties.length);
-                }
-
-                addMessage('assistant', data.text, data.properties, data.is_fallback);
-
-                // Show conversation ended notice if applicable
                 if (data.conversation_ended) {
-                    console.log('Conversation ended - lead should be saved');
-                    showConversationEndedNotice();
+                    showConversationEnded();
                 }
             } catch (error) {
                 hideTyping();
                 addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
                 console.error('Chat error:', error);
             }
-        }
-
-        function showConversationEndedNotice() {
-            const notice = document.createElement('div');
-            notice.className = 'message assistant';
-            notice.innerHTML = `
-                <div class="message-avatar">✅</div>
-                <div class="message-content">
-                    <div class="message-bubble" style="background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1)); border: 1px solid rgba(16,185,129,0.3);">
-                        <strong>Thank you for chatting!</strong><br>
-                        Our property expert will contact you soon.
-                    </div>
-                </div>
-            `;
-            messagesContainer.appendChild(notice);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     </script>
 </body>

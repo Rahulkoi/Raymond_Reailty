@@ -184,6 +184,40 @@ async def test_lead_capture():
     }
 
 
+@router.post("/save-test-lead")
+async def save_test_lead(
+    name: str = "Test User",
+    phone: str = "9876543210",
+    email: str = "testuser@example.com",
+    city: str = "Mumbai",
+    budget: str = "2 crore",
+    bhk: str = "2 BHK"
+):
+    """
+    Actually save a test lead to Salesforce.
+
+    Test URL: POST /api/voice/save-test-lead?name=Rahul&phone=9319220117&email=rahul@gmail.com&city=Mumbai&budget=2crore&bhk=2BHK
+    """
+    info = {
+        "fullName": name,
+        "mobileNumber": phone,
+        "emailAddress": email,
+        "city": city,
+        "budget": budget,
+        "configuration": bhk
+    }
+
+    print(f"Saving test lead: {info}")
+    sf_result = save_to_salesforce(info)
+
+    return {
+        "success": sf_result["success"],
+        "lead_data": info,
+        "salesforce_result": sf_result,
+        "message": "Lead saved to Salesforce!" if sf_result["success"] else sf_result.get("error")
+    }
+
+
 @router.get("/test-salesforce")
 async def test_salesforce_connection():
     """Test endpoint to verify Salesforce connection."""
