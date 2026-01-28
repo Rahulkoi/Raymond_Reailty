@@ -467,23 +467,66 @@
 
         async function startMicrophone() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true } });
-                audioContext = new AudioContext({ sampleRate: 16000 });
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+
+                // Create audio context (let browser choose sample rate)
+                audioContext = new AudioContext();
+                const inputSampleRate = audioContext.sampleRate;
+                console.log('Microphone sample rate:', inputSampleRate);
+
                 analyser = audioContext.createAnalyser();
                 microphone = audioContext.createMediaStreamSource(stream);
                 microphone.connect(analyser);
-                processor = audioContext.createScriptProcessor(2048, 1, 1);
+
+                // Use ScriptProcessor for compatibility
+                processor = audioContext.createScriptProcessor(4096, 1, 1);
+
                 processor.onaudioprocess = (e) => {
                     if (!isActive || !ws || ws.readyState !== WebSocket.OPEN) return;
+
                     const input = e.inputBuffer.getChannelData(0);
-                    const pcm16 = new Int16Array(input.length);
-                    for (let i = 0; i < input.length; i++) { const s = Math.max(-1, Math.min(1, input[i])); pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF; }
-                    ws.send(JSON.stringify({ user_audio_chunk: btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer))) }));
+
+                    // Resample to 16kHz if needed
+                    let samples;
+                    if (inputSampleRate !== 16000) {
+                        const ratio = inputSampleRate / 16000;
+                        const newLength = Math.round(input.length / ratio);
+                        samples = new Float32Array(newLength);
+                        for (let i = 0; i < newLength; i++) {
+                            const srcIdx = Math.round(i * ratio);
+                            samples[i] = input[Math.min(srcIdx, input.length - 1)];
+                        }
+                    } else {
+                        samples = input;
+                    }
+
+                    // Convert to 16-bit PCM
+                    const pcm16 = new Int16Array(samples.length);
+                    for (let i = 0; i < samples.length; i++) {
+                        const s = Math.max(-1, Math.min(1, samples[i]));
+                        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    }
+
+                    // Send as base64
+                    const base64 = btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer)));
+                    ws.send(JSON.stringify({ user_audio_chunk: base64 }));
                 };
+
                 microphone.connect(processor);
                 processor.connect(audioContext.destination);
                 updateUI('listening');
-            } catch (e) { console.error('Mic error:', e); statusEl.textContent = 'Mic access denied'; }
+                console.log('Microphone started successfully');
+            } catch (e) {
+                console.error('Mic error:', e);
+                statusEl.textContent = 'Mic access denied - ' + e.message;
+            }
         }
 
         function stopMicrophone() {

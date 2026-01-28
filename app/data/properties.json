@@ -1,33 +1,5 @@
 [
-  {
-    "id": "p1",
-    "name": "Prestige Lakeside Habitat",
-    "location": "Varthur, Bangalore",
-    "city": "Bangalore",
-    "price": 13000000,
-    "type": "Apartment",
-    "bhk": "3 BHK",
-    "area_sqft": 1850,
-    "price_per_sqft": 7027,
-    "floor": "12th of 25",
-    "facing": "East",
-    "possession": "Ready to Move",
-    "builder": "Prestige Group",
-    "rera_id": "PRM/KA/RERA/1251/2020",
-    "nearby_metro": "Whitefield Metro (3 km)",
-    "nearby_mall": "Phoenix Marketcity (5 km)",
-    "nearby_landmarks": ["Varthur Lake", "ITPL Tech Park", "Columbia Asia Hospital"],
-    "amenities": ["Swimming Pool", "Gym", "Clubhouse", "Children's Play Area", "24x7 Security"],
-    "description": "Premium lakeside living with stunning views and world-class amenities",
-    "property_url": "https://www.prestigeconstructions.com/residential-projects/prestige-lakeside-habitat",
-    "virtual_tour_url": "https://www.prestigeconstructions.com/virtual-tour/lakeside-habitat",
-    "brochure_url": "https://www.prestigeconstructions.com/brochures/lakeside-habitat.pdf",
-    "images": [
-      "https://www.prestigeconstructions.com/images/lakeside-habitat-1.jpg",
-      "https://www.prestigeconstructions.com/images/lakeside-habitat-2.jpg"
-    ],
-    "contact_number": "+91-80-4567-8901"
-  },
+  
   {
   "id": "rr1",
   "name": "Raymond Ten X Habitat",
@@ -55,9 +27,9 @@
     "Multi-purpose Court"
   ],
   "description": "A premium lifestyle development offering modern homes with 10x better living experience.",
-  "property_url": "https://www.raymondrealty.in/projects/ten-x-habitat",
-  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/ten-x-habitat",
-  "brochure_url": "https://www.raymondrealty.in/brochures/ten-x-habitat.pdf",
+  "property_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+  "virtual_tour_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+  "brochure_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
   "images": [
     "https://www.raymondrealty.in/images/ten-x-habitat-1.jpg",
     "https://www.raymondrealty.in/images/ten-x-habitat-2.jpg"
@@ -90,9 +62,9 @@
     "24x7 CCTV"
   ],
   "description": "Ten X Era brings futuristic living with premium residences designed for urban families.",
-  "property_url": "https://www.raymondrealty.in/projects/ten-x-era",
-  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/ten-x-era",
-  "brochure_url": "https://www.raymondrealty.in/brochures/ten-x-era.pdf",
+  "property_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+  "virtual_tour_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+  "brochure_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
   "images": [
     "https://www.raymondrealty.in/images/ten-x-era-1.jpg",
     "https://www.raymondrealty.in/images/ten-x-era-2.jpg"
@@ -127,9 +99,9 @@
     "High-speed Elevators"
   ],
   "description": "Ultra-luxury residences redefining skyline living in the heart of Mumbai.",
-  "property_url": "https://www.raymondrealty.in/projects/address-by-gs",
-  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/address-by-gs",
-  "brochure_url": "https://www.raymondrealty.in/brochures/address-by-gs.pdf",
+  "property_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-wadala",
+  "virtual_tour_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-wadala",
+  "brochure_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-wadala",
   "images": [
     "https://www.raymondrealty.in/images/address-by-gs-1.jpg",
     "https://www.raymondrealty.in/images/address-by-gs-2.jpg"
@@ -164,9 +136,9 @@
     "EV Charging"
   ],
   "description": "Exclusive luxury residences crafted for the elite with unmatched privacy and views.",
-  "property_url": "https://www.raymondrealty.in/projects/invictus",
-  "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/invictus",
-  "brochure_url": "https://www.raymondrealty.in/brochures/invictus.pdf",
+  "property_url": "https://www.raymondrealty.in/residential-property/ten-x-era-thane",
+  "virtual_tour_url": "https://www.raymondrealty.in/residential-property/ten-x-era-thane",
+  "brochure_url": "https://www.raymondrealty.in/residential-property/ten-x-era-thane",
   "images": [
     "https://www.raymondrealty.in/images/invictus-1.jpg",
     "https://www.raymondrealty.in/images/invictus-2.jpg"
@@ -193,10 +165,10 @@
     "nearby_landmarks": ["Upvan Lake", "Jupiter Hospital", "Eastern Express Highway"],
     "amenities": ["Swimming Pool", "Gym", "Clubhouse", "Jogging Track", "Kids Play Area", "24x7 Security"],
     "description": "Premium affordable homes by Raymond with world-class amenities",
-    "property_url": "https://www.raymondrealty.com/tenx-habitat",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/tenx",
-    "brochure_url": "https://www.raymondrealty.com/brochures/tenx.pdf",
-    "images": ["https://www.raymondrealty.com/images/tenx-1.jpg"],
+    "property_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-tower-b-thane",
+    "virtual_tour_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-tower-b-thane",
+    "brochure_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-tower-b-thane",
+    "images": ["https://www.raymondrealty.in/images/tenx-1.jpg"],
     "contact_number": "+91-22-6800-8000"
   },
   {
@@ -219,10 +191,10 @@
     "nearby_landmarks": ["Upvan Lake", "Jupiter Hospital", "Eastern Express Highway"],
     "amenities": ["Swimming Pool", "Gym", "Clubhouse", "Jogging Track", "Kids Play Area", "24x7 Security"],
     "description": "Spacious 3 BHK homes with premium finishes and lake views",
-    "property_url": "https://www.raymondrealty.com/tenx-habitat",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/tenx",
-    "brochure_url": "https://www.raymondrealty.com/brochures/tenx.pdf",
-    "images": ["https://www.raymondrealty.com/images/tenx-2.jpg"],
+    "property_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+    "virtual_tour_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+    "brochure_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-bkc",
+    "images": ["https://www.raymondrealty.in/images/tenx-2.jpg"],
     "contact_number": "+91-22-6800-8000"
   },
   {
@@ -245,10 +217,10 @@
     "nearby_landmarks": ["Ghodbunder Fort", "Yeoor Hills", "Brahmand"],
     "amenities": ["Infinity Pool", "Sky Lounge", "Mini Theatre", "Sports Arena", "Meditation Zone"],
     "description": "Premium living with stunning hill views on Ghodbunder Road",
-    "property_url": "https://www.raymondrealty.com/the-address",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/address",
-    "brochure_url": "https://www.raymondrealty.com/brochures/address.pdf",
-    "images": ["https://www.raymondrealty.com/images/address-1.jpg"],
+    "property_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-thane",
+    "virtual_tour_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-thane",
+    "brochure_url": "https://www.raymondrealty.in/residential-property/invictus-by-gs-thane",
+    "images": ["https://www.raymondrealty.in/images/address-1.jpg"],
     "contact_number": "+91-22-6800-8001"
   },
   {
@@ -271,10 +243,10 @@
     "nearby_landmarks": ["Ghodbunder Fort", "Yeoor Hills", "Brahmand"],
     "amenities": ["Infinity Pool", "Sky Lounge", "Mini Theatre", "Sports Arena", "Meditation Zone"],
     "description": "Luxurious 3 BHK with modern amenities and green surroundings",
-    "property_url": "https://www.raymondrealty.com/the-address",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/address",
-    "brochure_url": "https://www.raymondrealty.com/brochures/address.pdf",
-    "images": ["https://www.raymondrealty.com/images/address-2.jpg"],
+    "property_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "virtual_tour_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "brochure_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "images": ["https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra"],
     "contact_number": "+91-22-6800-8001"
   },
   {
@@ -297,10 +269,10 @@
     "nearby_landmarks": ["Thane Station", "Talao Pali Lake", "TMC Garden"],
     "amenities": ["Rooftop Garden", "Gym", "Community Hall", "Children's Area", "CCTV Security"],
     "description": "Smart compact homes perfect for young professionals",
-    "property_url": "https://www.raymondrealty.com/aspirations",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/aspirations",
-    "brochure_url": "https://www.raymondrealty.com/brochures/aspirations.pdf",
-    "images": ["https://www.raymondrealty.com/images/aspirations-1.jpg"],
+    "property_url": "https://www.raymondrealty.in/aspirations",
+    "virtual_tour_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "brochure_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "images": ["https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra"],
     "contact_number": "+91-22-6800-8002"
   },
   {
@@ -323,10 +295,10 @@
     "nearby_landmarks": ["Thane Station", "Talao Pali Lake", "TMC Garden"],
     "amenities": ["Rooftop Garden", "Gym", "Community Hall", "Children's Area", "CCTV Security"],
     "description": "Well-designed 2 BHK homes with excellent connectivity",
-    "property_url": "https://www.raymondrealty.com/aspirations",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/aspirations",
-    "brochure_url": "https://www.raymondrealty.com/brochures/aspirations.pdf",
-    "images": ["https://www.raymondrealty.com/images/aspirations-2.jpg"],
+    "property_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "virtual_tour_url": "https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra",
+    "brochure_url": "https://www.raymondrealty.in/brochures/aspirations.pdf",
+    "images": ["https://www.raymondrealty.in/residential-property/the-address-by-gs-bandra"],
     "contact_number": "+91-22-6800-8002"
   },
   {
@@ -349,10 +321,67 @@
     "nearby_landmarks": ["Eastern Express Highway", "Jupiter Hospital", "Hiranandani Estate"],
     "amenities": ["Olympic Pool", "Squash Court", "Business Center", "Party Lawn", "Pet Park"],
     "description": "Iconic tower with premium amenities at Thane's prime junction",
-    "property_url": "https://www.raymondrealty.com/jewels",
-    "virtual_tour_url": "https://www.raymondrealty.com/virtual-tour/jewels",
-    "brochure_url": "https://www.raymondrealty.com/brochures/jewels.pdf",
-    "images": ["https://www.raymondrealty.com/images/jewels-1.jpg"],
+    "property_url": "https://www.raymondrealty.in/jewels",
+    "virtual_tour_url": "https://www.raymondrealty.in/virtual-tour/jewels",
+    "brochure_url": "https://www.raymondrealty.in/brochures/jewels.pdf",
+    "images": ["https://www.raymondrealty.in/images/jewels-1.jpg"],
     "contact_number": "+91-22-6800-8003"
-  }
+  },
+  {
+  "id": "raymond-invictus-bkc",
+  "name": "Invictus by GS, BKC",
+  "developer": "Raymond Realty",
+  "location": "Bandra East, Bandra Kurla Complex (BKC), Mumbai, Maharashtra",
+  "city": "Mumbai",
+  "type": "Ultra-Luxury Residential",
+  "configurations": [
+    {
+      "bhk": "3 BHK",
+      "carpet_area_sqft": "1113 - 1353",
+      "price_range_cr": "₹6.21 - ₹7.42"
+    },
+    {
+      "bhk": "3.5 BHK",
+      "carpet_area_sqft": "1475",
+      "price_range_cr": "₹8.12"
+    },
+    {
+      "bhk": "4 BHK",
+      "carpet_area_sqft": "1685 - 1928",
+      "price_range_cr": "₹9.26+"
+    }
+  ],
+  "price_start_cr": 6.78,
+  "amenities": [
+    "38-m rooftop infinity pool with skyline views",
+    "Luxury clubhouse",
+    "Sky lounge and elevated podium spaces",
+    "Indoor and outdoor fitness areas",
+    "Kids play area",
+    "Multipurpose activity rooms",
+    "Landscaped gardens and green spaces",
+    "Jogging and walking tracks",
+    "Business lounge and meeting corners"
+  ],
+  "highlights": [
+    "Ultra-luxury 3 & 4 BHK residences",
+    "Prime BKC location with excellent connectivity",
+    "Eco-responsible living and sustainability features",
+    "Over 30 lifestyle and leisure amenities",
+    "Strong developer legacy and high-end design"
+  ],
+  "land_area_acres": 2.1,
+  "towers": 6,
+  "floors": "13 - 23+",
+  "possession": "Under Construction",
+  "description": "Invictus by GS, BKC is an ultra-luxury residential project by Raymond Realty in Bandra East’s Bandra Kurla Complex (BKC), offering premium 3, 3.5 and 4 BHK apartments with modern amenities, Vastu-compliant layouts, and connectivity to major business and lifestyle hubs in Mumbai.",
+  "strategic_advantages": [
+    "Prime Bandra East location near Jio World Drive & Sea Link",
+    "Strong corporate and leisure district connections",
+    "Exclusive lifestyle experience for premium buyers"
+  ],
+  "estimated_revenue_potential_crore": 2000
+}
+
+
 ]
